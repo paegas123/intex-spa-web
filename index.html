@@ -196,6 +196,24 @@
   .btn-secondary { background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border); }
 
   .footer-note { margin-top: 20px; text-align: center; font-size: 11px; color: var(--text-muted); opacity: 0.7; }
+  .copyright { margin-top: 4px; text-align: center; font-size: 10px; color: var(--text-muted); opacity: 0.5; }
+
+  /* ---------- Signal strip ---------- */
+  .signal-strip {
+    display: flex; gap: 14px; justify-content: center; align-items: center;
+    padding: 7px 12px; margin-bottom: 12px; background: var(--bg-panel);
+    border: 1px solid var(--border); border-radius: 10px;
+  }
+  .signal-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+  .signal-bar {
+    width: 44px; height: 6px; border-radius: 3px; background: var(--bg-panel-raised);
+    overflow: hidden; display: inline-block;
+  }
+  .signal-fill {
+    display: block; height: 100%; width: 0%; border-radius: 3px;
+    background: var(--danger); transition: width 0.4s, background 0.4s;
+  }
+  .signal-pct { font-family: 'Share Tech Mono', monospace; font-size: 11px; min-width: 30px; color: var(--text); }
 </style>
 </head>
 <body>
@@ -223,6 +241,19 @@
 
   <!-- ============== TAB: Ovládání ============== -->
   <div class="tab-panel active" id="tab-control">
+    <div class="signal-strip" id="signalStrip">
+      <div class="signal-item">
+        <span class="signal-label" data-i18n="signal_router">Router</span>
+        <span class="signal-bar"><span class="signal-fill" id="signalHomeFill"></span></span>
+        <span class="signal-pct" id="signalHomePct">--%</span>
+      </div>
+      <div class="signal-item">
+        <span class="signal-label" data-i18n="signal_panel">Panel</span>
+        <span class="signal-bar"><span class="signal-fill" id="signalPanelFill"></span></span>
+        <span class="signal-pct" id="signalPanelPct">--%</span>
+      </div>
+    </div>
+
     <div class="temp-panel">
       <div class="temp-label" data-i18n="current_temp">Aktuální teplota</div>
       <div class="temp-current na" id="currentTemp">– –</div>
@@ -353,22 +384,25 @@
   </div>
 
   <div class="footer-note">intexspa • přímé MQTT spojení, bez appky</div>
+  <div class="copyright">© Tomáš Pavlas</div>
 </div>
 
 <!-- ============== Modal: Nastavení připojení ============== -->
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal">
     <h2 data-i18n="conn_title">Připojení k brokeru</h2>
-    <p class="hint" data-i18n="conn_hint">Údaje se uloží jen v tomto prohlížeči.</p>
-    <div class="field"><label data-i18n="broker_host">Adresa brokeru</label><input type="text" id="fHost" placeholder="xxxxxxx.s1.eu.hivemq.cloud"></div>
-    <div class="field"><label data-i18n="broker_port">WebSocket port</label><input type="text" id="fPort" placeholder="8884"></div>
-    <div class="field"><label data-i18n="username">Uživatelské jméno</label><input type="text" id="fUser" placeholder="Intex"></div>
-    <div class="field"><label data-i18n="password">Heslo</label><input type="password" id="fPass" placeholder="••••••••"></div>
-    <div class="field-error" id="settingsError"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="cancelSettings" data-i18n="cancel">Zrušit</button>
-      <button class="btn btn-primary" id="saveSettings" data-i18n="save_connect">Uložit a připojit</button>
-    </div>
+    <p class="hint" data-i18n="conn_hint">Prohlížeč ti může nabídnout uložení do správce hesel, ať to příště nepíšeš znovu.</p>
+    <form id="connForm" autocomplete="on">
+      <div class="field"><label data-i18n="broker_host">Adresa brokeru</label><input type="text" id="fHost" name="broker-host" autocomplete="url" placeholder="xxxxxxx.s1.eu.hivemq.cloud"></div>
+      <div class="field"><label data-i18n="broker_port">WebSocket port</label><input type="text" id="fPort" name="broker-port" inputmode="numeric" placeholder="8884"></div>
+      <div class="field"><label data-i18n="username">Uživatelské jméno</label><input type="text" id="fUser" name="username" autocomplete="username" placeholder="Intex"></div>
+      <div class="field"><label data-i18n="password">Heslo</label><input type="password" id="fPass" name="password" autocomplete="current-password" placeholder="••••••••"></div>
+      <div class="field-error" id="settingsError"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="cancelSettings" data-i18n="cancel">Zrušit</button>
+        <button type="submit" class="btn btn-primary" id="saveSettings" data-i18n="save_connect">Uložit a připojit</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -425,7 +459,7 @@
       esp_time: "Aktuální čas ESP32", esp_time_hint: "Podle tohoto času se řídí plány. Pokud neodpovídá realitě, uprav časové pásmo níže.",
       timezone: "Časové pásmo", timezone_hint: "Automaticky = zjistí se podle veřejné IP adresy ESP32.",
       auto: "Automaticky", manual: "Ručně", offset_hours: "Posun oproti UTC (hodiny)", save: "Uložit",
-      conn_title: "Připojení k brokeru", conn_hint: "Údaje se uloží jen v tomto prohlížeči.",
+      conn_title: "Připojení k brokeru", conn_hint: "Prohlížeč ti může nabídnout uložení do správce hesel, ať to příště nepíšeš znovu.",
       broker_host: "Adresa brokeru", broker_port: "WebSocket port", username: "Uživatelské jméno", password: "Heslo",
       cancel: "Zrušit", save_connect: "Uložit a připojit",
       new_schedule: "Nový plán", edit_schedule: "Upravit plán", function: "Funkce", days: "Dny",
@@ -462,7 +496,8 @@
       guide_step4_p2: "Od teď stačí ťuknout na ikonku na ploše – otevře se přímo ovládání vířivky, na celou obrazovku, bez adresního řádku. Při prvním otevření zadej ⚙ přihlašovací MQTT údaje z kroku 2.",
       guide_cloud_title: "O čem je ta „cloud“ ikonka připojení",
       guide_cloud_p1: "Tahle appka mluví s vířivkou přes MQTT broker <b>HiveMQ Cloud</b> (zdarma služba, ne firma Intex). Je to jen „pošta uprostřed“ – ESP32 tam posílá stav, appka posílá příkazy, samotné rozhodování (plány, časování) běží pořád v ESP32 doma, ne v cloudu.",
-      guide_cloud_p2: "Díky tomu appka funguje stejně doma i mimo domov, a nezávisí na Intexu ani na jejich appce."
+      guide_cloud_p2: "Díky tomu appka funguje stejně doma i mimo domov, a nezávisí na Intexu ani na jejich appce.",
+      signal_router: "Router", signal_panel: "Panel"
     },
     en: {
       app_title: "Spa", tab_control: "Control", tab_schedule: "Schedules", tab_settings: "Settings",
@@ -473,7 +508,7 @@
       esp_time: "ESP32 current time", esp_time_hint: "Schedules run based on this clock. If it looks wrong, adjust the timezone below.",
       timezone: "Timezone", timezone_hint: "Automatic = detected from the ESP32's public IP address.",
       auto: "Automatic", manual: "Manual", offset_hours: "UTC offset (hours)", save: "Save",
-      conn_title: "Broker connection", conn_hint: "Saved only in this browser.",
+      conn_title: "Broker connection", conn_hint: "Your browser may offer to save this to its password manager, so you won't need to type it again.",
       broker_host: "Broker address", broker_port: "WebSocket port", username: "Username", password: "Password",
       cancel: "Cancel", save_connect: "Save & connect",
       new_schedule: "New schedule", edit_schedule: "Edit schedule", function: "Function", days: "Days",
@@ -510,7 +545,8 @@
       guide_step4_p2: "From now on, just tap the home screen icon – it opens spa control directly, full-screen, no address bar. First time you open it, enter the MQTT login from step 2 via ⚙.",
       guide_cloud_title: "What that \"cloud\" connection is about",
       guide_cloud_p1: "This app talks to the spa through the <b>HiveMQ Cloud</b> MQTT broker (a free service, not Intex). It's just a \"mailbox in the middle\" – the ESP32 sends status there, the app sends commands there; the actual decision-making (schedules, timing) still runs on the ESP32 at home, not in the cloud.",
-      guide_cloud_p2: "That's why the app works the same at home and away, and doesn't depend on Intex or their app."
+      guide_cloud_p2: "That's why the app works the same at home and away, and doesn't depend on Intex or their app.",
+      signal_router: "Router", signal_panel: "Panel"
     },
     de: {
       app_title: "Whirlpool", tab_control: "Steuerung", tab_schedule: "Zeitpläne", tab_settings: "Einstellungen",
@@ -521,7 +557,7 @@
       esp_time: "Aktuelle Zeit (ESP32)", esp_time_hint: "Zeitpläne richten sich nach dieser Uhr. Falls falsch, Zeitzone unten anpassen.",
       timezone: "Zeitzone", timezone_hint: "Automatisch = anhand der öffentlichen IP-Adresse des ESP32 ermittelt.",
       auto: "Automatisch", manual: "Manuell", offset_hours: "UTC-Versatz (Stunden)", save: "Speichern",
-      conn_title: "Broker-Verbindung", conn_hint: "Wird nur in diesem Browser gespeichert.",
+      conn_title: "Broker-Verbindung", conn_hint: "Der Browser bietet eventuell an, dies im Passwort-Manager zu speichern, damit du es nicht erneut eingeben musst.",
       broker_host: "Broker-Adresse", broker_port: "WebSocket-Port", username: "Benutzername", password: "Passwort",
       cancel: "Abbrechen", save_connect: "Speichern & verbinden",
       new_schedule: "Neuer Zeitplan", edit_schedule: "Zeitplan bearbeiten", function: "Funktion", days: "Tage",
@@ -558,7 +594,8 @@
       guide_step4_p2: "Ab jetzt reicht ein Tipp auf das Symbol auf dem Homescreen – öffnet direkt die Whirlpool-Steuerung, im Vollbild, ohne Adressleiste. Beim ersten Öffnen die MQTT-Zugangsdaten aus Schritt 2 über ⚙ eingeben.",
       guide_cloud_title: "Was das „Cloud“-Verbindungssymbol bedeutet",
       guide_cloud_p1: "Diese App spricht über den MQTT-Broker <b>HiveMQ Cloud</b> mit dem Whirlpool (ein kostenloser Dienst, nicht von Intex). Er ist nur ein „Briefkasten in der Mitte“ – der ESP32 sendet dort den Status hin, die App sendet dort Befehle hin; die eigentliche Logik (Zeitpläne, Timing) läuft weiterhin auf dem ESP32 zu Hause, nicht in der Cloud.",
-      guide_cloud_p2: "Deshalb funktioniert die App zu Hause und unterwegs gleich und ist unabhängig von Intex und deren App."
+      guide_cloud_p2: "Deshalb funktioniert die App zu Hause und unterwegs gleich und ist unabhängig von Intex und deren App.",
+      signal_router: "Router", signal_panel: "Panel"
     }
   };
 
@@ -605,6 +642,7 @@
   const TOPIC_SCHED_REQUEST = "intexspa/schedule/request";
   const TOPIC_TIME = "intexspa/settings/time";
   const TOPIC_TIME_SET = "intexspa/settings/time/set";
+  const TOPIC_SIGNAL = "intexspa/signal";
 
   const STORAGE_KEY = "intexspa_mqtt_config";
   let client = null;
@@ -646,7 +684,8 @@
 
   document.getElementById("gearBtn").addEventListener("click", () => { clearSettingsError(); openSettings(); });
   document.getElementById("cancelSettings").addEventListener("click", closeSettings);
-  document.getElementById("saveSettings").addEventListener("click", () => {
+  document.getElementById("connForm").addEventListener("submit", (e) => {
+    e.preventDefault();
     clearSettingsError();
     if (typeof mqtt === "undefined") { showSettingsError(t("err_mqtt_lib")); return; }
     const cfg = {
@@ -689,6 +728,7 @@
       client.subscribe(TOPIC_AVAIL);
       client.subscribe(TOPIC_SCHED_LIST);
       client.subscribe(TOPIC_TIME);
+      client.subscribe(TOPIC_SIGNAL);
       client.publish(TOPIC_SCHED_REQUEST, "1");
     });
     client.on("reconnect", () => setConnStatus("", "connecting"));
@@ -703,6 +743,7 @@
         else if (topic === TOPIC_AVAIL) setConnStatus(str === "online" ? "ok" : "warm", str === "online" ? "connected" : "bridge_offline");
         else if (topic === TOPIC_SCHED_LIST) { schedules = JSON.parse(str); renderSchedules(); }
         else if (topic === TOPIC_TIME) { timeInfo = JSON.parse(str); renderTime(); }
+        else if (topic === TOPIC_SIGNAL) { renderSignal(JSON.parse(str)); }
       } catch (e) { console.error("Chyba zpracovani zpravy", topic, e); }
     });
   }
@@ -894,6 +935,30 @@
     publishSchedules();
     closeSchedModal();
   });
+
+  // ===================== Signál (router + panel) =====================
+  function signalColor(pct) {
+    if (pct >= 60) return "#2dd4ee";
+    if (pct >= 30) return "#ff7a52";
+    return "#ff5566";
+  }
+  function renderSignal(sig) {
+    const homePct = sig.home_percent || 0;
+    const panelPct = sig.panel_connected ? (sig.panel_percent || 0) : 0;
+
+    document.getElementById("signalHomeFill").style.width = homePct + "%";
+    document.getElementById("signalHomeFill").style.background = signalColor(homePct);
+    document.getElementById("signalHomePct").textContent = homePct + "%";
+
+    if (sig.panel_connected) {
+      document.getElementById("signalPanelFill").style.width = panelPct + "%";
+      document.getElementById("signalPanelFill").style.background = signalColor(panelPct);
+      document.getElementById("signalPanelPct").textContent = panelPct + "%";
+    } else {
+      document.getElementById("signalPanelFill").style.width = "0%";
+      document.getElementById("signalPanelPct").textContent = "–";
+    }
+  }
 
   // ===================== Nastavení: čas / časové pásmo =====================
   function renderTime() {
