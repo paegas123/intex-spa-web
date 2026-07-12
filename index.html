@@ -149,7 +149,9 @@
     background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px;
   }
   .settings-card h3 { font-size: 13px; margin: 0 0 4px; color: var(--text); }
-  .settings-card p.hint { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; }
+  .settings-card p.hint { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.5; }
+  .os-ios { display: none; }
+  .os-android { display: block; }
   .clock-display {
     font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--accent); text-align: center; padding: 10px 0;
   }
@@ -216,6 +218,7 @@
     <button class="tab-btn active" data-tab="control" data-i18n="tab_control">Ovládání</button>
     <button class="tab-btn" data-tab="schedule" data-i18n="tab_schedule">Plány</button>
     <button class="tab-btn" data-tab="settings" data-i18n="tab_settings">Nastavení</button>
+    <button class="tab-btn" data-tab="guide" data-i18n="tab_guide">Návod</button>
   </div>
 
   <!-- ============== TAB: Ovládání ============== -->
@@ -294,6 +297,58 @@
         <input type="number" id="tzOffsetInput" step="0.5" value="1">
       </div>
       <button class="btn btn-primary" id="tzSaveBtn" style="width:100%;" data-i18n="save">Uložit</button>
+    </div>
+  </div>
+
+  <!-- ============== TAB: Návod ============== -->
+  <div class="tab-panel" id="tab-guide">
+    <div class="settings-card">
+      <p class="hint" data-i18n="guide_intro">Kompletní postup od nuly, jednorázově. Až bude hotovo, běžné používání je jen otevření této stránky.</p>
+      <div class="radio-row">
+        <div class="radio-opt active" id="osAndroidBtn">Android</div>
+        <div class="radio-opt" id="osIosBtn">iPhone / iOS</div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="guide_step1_title">1. Spárování panelu s ESP32 (jen jednou)</h3>
+      <p class="hint" data-i18n="guide_step1_p1">Toto se dělá jen jednou v životě zařízení. Panel si přihlašovací údaje pamatuje natrvalo.</p>
+      <p class="hint os-android" data-i18n="guide_step1_android1">Stáhni appku <b>EsptouchForAndroid</b> (Espressif) z Google Play.</p>
+      <p class="hint os-ios" data-i18n="guide_step1_ios1">Stáhni appku <b>Espressif Esptouch</b> z App Store. Appka si vyžádá přístup k poloze – bez něj nevidí, k jaké WiFi síti je telefon připojen.</p>
+      <p class="hint" data-i18n="guide_step1_p2">Připoj telefon k síti ESP32 pro panel (výchozí jméno a heslo najdeš v config.h firmwaru, případně se domluv s tím, kdo zařízení instaloval).</p>
+      <p class="hint" data-i18n="guide_step1_p3">V appce zvol protokol <b>ESPTouch (V1)</b>, zadej stejné SSID a heslo jako síť, ke které je telefon připojen.</p>
+      <p class="hint" data-i18n="guide_step1_p4">Na originálním panelu vířivky podrž tlačítko <b>C/F</b> asi 1 minutu, dokud nezabliká ikonka WiFi.</p>
+      <p class="hint" data-i18n="guide_step1_p5">V appce spusť odeslání. Do minuty by se panel měl připojit. Appku pak už nikdy nepotřebuješ.</p>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="guide_step2_title">2. Založení účtu HiveMQ Cloud (zdarma)</h3>
+      <p class="hint" data-i18n="guide_step2_p0">Tohle je taky jednorázová věc. HiveMQ Cloud je zdarma "poštovní schránka", přes kterou spolu appka a ESP32 mluví. Karta se nevyžaduje.</p>
+      <p class="hint" data-i18n="guide_step2_p1a">Jdi na <b>console.hivemq.cloud</b> a zaregistruj se e-mailem.</p>
+      <p class="hint" data-i18n="guide_step2_p1b">Klikni na <b>„Get Broker or Edge“</b> → zvol <b>„HiveMQ Cloud“</b> → Continue.</p>
+      <p class="hint" data-i18n="guide_step2_p1c">Vyber tarif <b>Serverless (Free)</b> - je zdarma napořád, žádná karta.</p>
+      <p class="hint" data-i18n="guide_step2_p1d">Klikni na vytvořený broker → záložka <b>„Access Management“</b> → <b>„Add New“</b> → zadej uživatelské jméno a heslo, oprávnění nastav na <b>„Publish and Subscribe“</b> (ne jen Subscribe).</p>
+      <p class="hint" data-i18n="guide_step2_p1e">Na záložce <b>„Overview“</b> najdeš <b>„URL TLS MQTT“</b> - to je adresa serveru (bez části za dvojtečkou) a port (číslo za dvojtečkou, obvykle 8883). Tyhle 4 údaje (adresa, port, jméno, heslo) budeš potřebovat v dalším kroku.</p>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="guide_step3_title">3. Nastavení domácí WiFi a MQTT na ESP32</h3>
+      <p class="hint" data-i18n="guide_step3_p1">Zůstaň připojen k síti ESP32 (nebo se k ní znovu připoj).</p>
+      <p class="hint" data-i18n="guide_step3_p2b">V prohlížeči otevři adresu <b>192.168.4.1</b>.</p>
+      <p class="hint" data-i18n="guide_step3_p3">Vyplň jméno a heslo své domácí WiFi a MQTT údaje z kroku 2 (adresa brokeru, port, uživatel, heslo) a ulož. ESP32 se restartuje a připojí se k internetu.</p>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="guide_step4_title">4. Přidání této stránky na plochu telefonu</h3>
+      <p class="hint os-android" data-i18n="guide_step4_android">V Chromu otevři tuto stránku → nabídka (tři tečky vpravo nahoře) → <b>„Přidat na plochu“</b> / <b>„Nainstalovat aplikaci“</b>.</p>
+      <p class="hint os-ios" data-i18n="guide_step4_ios">V Safari otevři tuto stránku → tlačítko Sdílet (čtverec se šipkou nahoru) → <b>„Přidat na plochu“</b>.</p>
+      <p class="hint" data-i18n="guide_step4_p2">Od teď stačí ťuknout na ikonku na ploše – otevře se přímo ovládání vířivky, na celou obrazovku, bez adresního řádku. Při prvním otevření zadej ⚙ přihlašovací MQTT údaje z kroku 2.</p>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="guide_cloud_title">O čem je ta „cloud“ ikonka připojení</h3>
+      <p class="hint" data-i18n="guide_cloud_p1">Tahle appka mluví s vířivkou přes MQTT broker <b>HiveMQ Cloud</b> (zdarma služba, ne firma Intex). Je to jen "pošta uprostřed" – ESP32 tam posílá stav, appka posílá příkazy, samotné rozhodování (plány, časování) běží pořád v ESP32 doma, ne v cloudu.</p>
+      <p class="hint" data-i18n="guide_cloud_p2">Díky tomu appka funguje stejně doma i mimo domov, a nezávisí na Intexu ani na jejich appce.</p>
     </div>
   </div>
 
@@ -379,7 +434,35 @@
       err_host: "Vyplň adresu brokeru.", err_user: "Vyplň uživatelské jméno.",
       err_days: "Vyber aspoň jeden den.", err_mqtt_lib: "Knihovna MQTT se nenačetla (chybí internet nebo ji blokuje prohlížeč).",
       connecting: "Připojuji…", connected: "Připojeno", disconnected: "Odpojeno", bridge_offline: "Bridge offline",
-      conn_error: "Chyba připojení", not_set: "Nenastaveno"
+      conn_error: "Chyba připojení", not_set: "Nenastaveno",
+      tab_guide: "Návod",
+      guide_intro: "Kompletní postup od nuly, jednorázově. Až bude hotovo, běžné používání je jen otevření této stránky.",
+      guide_step1_title: "1. Spárování panelu s ESP32 (jen jednou)",
+      guide_step1_p1: "Toto se dělá jen jednou v životě zařízení. Panel si přihlašovací údaje pamatuje natrvalo.",
+      guide_step1_android1: "Stáhni appku <b>EsptouchForAndroid</b> (Espressif) z Google Play.",
+      guide_step1_ios1: "Stáhni appku <b>Espressif Esptouch</b> z App Store. Appka si vyžádá přístup k poloze – bez něj nevidí, k jaké WiFi síti je telefon připojen.",
+      guide_step1_p2: "Připoj telefon k síti ESP32 pro panel (jméno a heslo najdeš v config.h firmwaru, nebo se domluv s tím, kdo zařízení instaloval).",
+      guide_step1_p3: "V appce zvol protokol <b>ESPTouch (V1)</b>, zadej stejné SSID a heslo jako síť, ke které je telefon připojen.",
+      guide_step1_p4: "Na originálním panelu vířivky podrž tlačítko <b>C/F</b> asi 1 minutu, dokud nezabliká ikonka WiFi.",
+      guide_step1_p5: "V appce spusť odeslání. Do minuty by se panel měl připojit. Appku pak už nikdy nepotřebuješ.",
+      guide_step2_title: "2. Založení účtu HiveMQ Cloud (zdarma)",
+      guide_step2_p0: "Tohle je taky jednorázová věc. HiveMQ Cloud je zdarma „poštovní schránka“, přes kterou spolu appka a ESP32 mluví. Karta se nevyžaduje.",
+      guide_step2_p1a: "Jdi na <b>console.hivemq.cloud</b> a zaregistruj se e-mailem.",
+      guide_step2_p1b: "Klikni na <b>„Get Broker or Edge“</b> → zvol <b>„HiveMQ Cloud“</b> → Continue.",
+      guide_step2_p1c: "Vyber tarif <b>Serverless (Free)</b> - je zdarma napořád, žádná karta.",
+      guide_step2_p1d: "Klikni na vytvořený broker → záložka <b>„Access Management“</b> → <b>„Add New“</b> → zadej uživatelské jméno a heslo, oprávnění nastav na <b>„Publish and Subscribe“</b> (ne jen Subscribe).",
+      guide_step2_p1e: "Na záložce <b>„Overview“</b> najdeš <b>„URL TLS MQTT“</b> - to je adresa serveru (bez části za dvojtečkou) a port (číslo za dvojtečkou, obvykle 8883). Tyhle 4 údaje (adresa, port, jméno, heslo) budeš potřebovat v dalším kroku.",
+      guide_step3_title: "3. Nastavení domácí WiFi a MQTT na ESP32",
+      guide_step3_p1: "Zůstaň připojen k síti ESP32 (nebo se k ní znovu připoj).",
+      guide_step3_p2b: "V prohlížeči otevři adresu <b>192.168.4.1</b>.",
+      guide_step3_p3: "Vyplň jméno a heslo své domácí WiFi a MQTT údaje z kroku 2 (adresa brokeru, port, uživatel, heslo) a ulož. ESP32 se restartuje a připojí se k internetu.",
+      guide_step4_title: "4. Přidání této stránky na plochu telefonu",
+      guide_step4_android: "V Chromu otevři tuto stránku → nabídka (tři tečky vpravo nahoře) → <b>„Přidat na plochu“</b> / <b>„Nainstalovat aplikaci“</b>.",
+      guide_step4_ios: "V Safari otevři tuto stránku → tlačítko Sdílet (čtverec se šipkou nahoru) → <b>„Přidat na plochu“</b>.",
+      guide_step4_p2: "Od teď stačí ťuknout na ikonku na ploše – otevře se přímo ovládání vířivky, na celou obrazovku, bez adresního řádku. Při prvním otevření zadej ⚙ přihlašovací MQTT údaje z kroku 2.",
+      guide_cloud_title: "O čem je ta „cloud“ ikonka připojení",
+      guide_cloud_p1: "Tahle appka mluví s vířivkou přes MQTT broker <b>HiveMQ Cloud</b> (zdarma služba, ne firma Intex). Je to jen „pošta uprostřed“ – ESP32 tam posílá stav, appka posílá příkazy, samotné rozhodování (plány, časování) běží pořád v ESP32 doma, ne v cloudu.",
+      guide_cloud_p2: "Díky tomu appka funguje stejně doma i mimo domov, a nezávisí na Intexu ani na jejich appce."
     },
     en: {
       app_title: "Spa", tab_control: "Control", tab_schedule: "Schedules", tab_settings: "Settings",
@@ -399,7 +482,35 @@
       err_host: "Enter the broker address.", err_user: "Enter a username.",
       err_days: "Pick at least one day.", err_mqtt_lib: "MQTT library failed to load (no internet or blocked by browser).",
       connecting: "Connecting…", connected: "Connected", disconnected: "Disconnected", bridge_offline: "Bridge offline",
-      conn_error: "Connection error", not_set: "Not set up"
+      conn_error: "Connection error", not_set: "Not set up",
+      tab_guide: "Guide",
+      guide_intro: "Full setup from scratch, one time only. Once done, everyday use is just opening this page.",
+      guide_step1_title: "1. Pairing the panel with the ESP32 (one time only)",
+      guide_step1_p1: "This is done once per device. The panel remembers the credentials permanently.",
+      guide_step1_android1: "Download the <b>EsptouchForAndroid</b> app (Espressif) from Google Play.",
+      guide_step1_ios1: "Download the <b>Espressif Esptouch</b> app from the App Store. It will ask for location access – without it, it can't see which WiFi network the phone is on.",
+      guide_step1_p2: "Connect your phone to the ESP32's panel network (name/password are in the firmware's config.h, or ask whoever installed the device).",
+      guide_step1_p3: "In the app, choose the <b>ESPTouch (V1)</b> protocol, enter the same SSID and password as the network your phone is connected to.",
+      guide_step1_p4: "On the spa's original panel, hold the <b>C/F</b> button for about 1 minute until the WiFi icon starts blinking.",
+      guide_step1_p5: "Start sending in the app. The panel should connect within a minute. You'll never need the app again after this.",
+      guide_step2_title: "2. Create a HiveMQ Cloud account (free)",
+      guide_step2_p0: "Also a one-time thing. HiveMQ Cloud is a free \"mailbox\" the app and ESP32 use to talk to each other. No card required.",
+      guide_step2_p1a: "Go to <b>console.hivemq.cloud</b> and sign up with your email.",
+      guide_step2_p1b: "Click <b>\"Get Broker or Edge\"</b> → choose <b>\"HiveMQ Cloud\"</b> → Continue.",
+      guide_step2_p1c: "Pick the <b>Serverless (Free)</b> plan - free forever, no card needed.",
+      guide_step2_p1d: "Click your new broker → <b>\"Access Management\"</b> tab → <b>\"Add New\"</b> → set a username and password, permission set to <b>\"Publish and Subscribe\"</b> (not just Subscribe).",
+      guide_step2_p1e: "On the <b>\"Overview\"</b> tab, find <b>\"URL TLS MQTT\"</b> - that's the server address (the part before the colon) and port (the number after the colon, usually 8883). You'll need these 4 values (address, port, username, password) in the next step.",
+      guide_step3_title: "3. Setting home WiFi and MQTT on the ESP32",
+      guide_step3_p1: "Stay connected to the ESP32's network (or reconnect to it).",
+      guide_step3_p2b: "Open <b>192.168.4.1</b> in your browser.",
+      guide_step3_p3: "Fill in your home WiFi name/password and the MQTT details from step 2 (broker address, port, username, password), then save. The ESP32 restarts and connects to the internet.",
+      guide_step4_title: "4. Adding this page to your phone's home screen",
+      guide_step4_android: "In Chrome, open this page → menu (three dots, top right) → <b>\"Add to Home screen\"</b> / <b>\"Install app\"</b>.",
+      guide_step4_ios: "In Safari, open this page → Share button (square with an arrow) → <b>\"Add to Home Screen\"</b>.",
+      guide_step4_p2: "From now on, just tap the home screen icon – it opens spa control directly, full-screen, no address bar. First time you open it, enter the MQTT login from step 2 via ⚙.",
+      guide_cloud_title: "What that \"cloud\" connection is about",
+      guide_cloud_p1: "This app talks to the spa through the <b>HiveMQ Cloud</b> MQTT broker (a free service, not Intex). It's just a \"mailbox in the middle\" – the ESP32 sends status there, the app sends commands there; the actual decision-making (schedules, timing) still runs on the ESP32 at home, not in the cloud.",
+      guide_cloud_p2: "That's why the app works the same at home and away, and doesn't depend on Intex or their app."
     },
     de: {
       app_title: "Whirlpool", tab_control: "Steuerung", tab_schedule: "Zeitpläne", tab_settings: "Einstellungen",
@@ -419,7 +530,35 @@
       err_host: "Broker-Adresse eingeben.", err_user: "Benutzernamen eingeben.",
       err_days: "Mindestens einen Tag wählen.", err_mqtt_lib: "MQTT-Bibliothek konnte nicht geladen werden (kein Internet oder vom Browser blockiert).",
       connecting: "Verbinde…", connected: "Verbunden", disconnected: "Getrennt", bridge_offline: "Bridge offline",
-      conn_error: "Verbindungsfehler", not_set: "Nicht eingerichtet"
+      conn_error: "Verbindungsfehler", not_set: "Nicht eingerichtet",
+      tab_guide: "Anleitung",
+      guide_intro: "Komplette Einrichtung von Grund auf, nur einmal nötig. Danach reicht im Alltag das Öffnen dieser Seite.",
+      guide_step1_title: "1. Panel mit dem ESP32 koppeln (nur einmal)",
+      guide_step1_p1: "Das passiert nur einmal pro Gerät. Das Panel merkt sich die Zugangsdaten dauerhaft.",
+      guide_step1_android1: "Lade die App <b>EsptouchForAndroid</b> (Espressif) aus dem Google Play Store.",
+      guide_step1_ios1: "Lade die App <b>Espressif Esptouch</b> aus dem App Store. Sie fragt nach Standortzugriff – ohne den sieht sie nicht, mit welchem WLAN das Handy verbunden ist.",
+      guide_step1_p2: "Verbinde dein Handy mit dem WLAN des ESP32 für das Panel (Name/Passwort stehen in config.h der Firmware, oder frag die Person, die das Gerät installiert hat).",
+      guide_step1_p3: "Wähle in der App das Protokoll <b>ESPTouch (V1)</b>, gib dasselbe SSID und Passwort ein wie das WLAN, mit dem das Handy verbunden ist.",
+      guide_step1_p4: "Halte am Original-Panel des Whirlpools die Taste <b>C/F</b> etwa 1 Minute gedrückt, bis das WLAN-Symbol blinkt.",
+      guide_step1_p5: "Starte den Versand in der App. Das Panel sollte sich innerhalb einer Minute verbinden. Die App wird danach nie wieder benötigt.",
+      guide_step2_title: "2. HiveMQ Cloud Konto erstellen (kostenlos)",
+      guide_step2_p0: "Auch das nur einmalig. HiveMQ Cloud ist ein kostenloser „Briefkasten“, über den App und ESP32 miteinander sprechen. Keine Kreditkarte nötig.",
+      guide_step2_p1a: "Gehe zu <b>console.hivemq.cloud</b> und registriere dich mit deiner E-Mail.",
+      guide_step2_p1b: "Klicke auf <b>„Get Broker or Edge“</b> → wähle <b>„HiveMQ Cloud“</b> → Continue.",
+      guide_step2_p1c: "Wähle den Tarif <b>Serverless (Free)</b> - dauerhaft kostenlos, keine Karte nötig.",
+      guide_step2_p1d: "Klicke auf deinen neuen Broker → Tab <b>„Access Management“</b> → <b>„Add New“</b> → Benutzername und Passwort festlegen, Berechtigung auf <b>„Publish and Subscribe“</b> setzen (nicht nur Subscribe).",
+      guide_step2_p1e: "Im Tab <b>„Overview“</b> findest du <b>„URL TLS MQTT“</b> - das ist die Server-Adresse (Teil vor dem Doppelpunkt) und der Port (Zahl nach dem Doppelpunkt, meist 8883). Diese 4 Angaben (Adresse, Port, Benutzername, Passwort) brauchst du im nächsten Schritt.",
+      guide_step3_title: "3. Heim-WLAN und MQTT auf dem ESP32 einrichten",
+      guide_step3_p1: "Bleib mit dem WLAN des ESP32 verbunden (oder verbinde dich erneut).",
+      guide_step3_p2b: "Öffne im Browser die Adresse <b>192.168.4.1</b>.",
+      guide_step3_p3: "Trage Name/Passwort deines Heim-WLANs und die MQTT-Daten aus Schritt 2 ein (Broker-Adresse, Port, Benutzername, Passwort) und speichere. Der ESP32 startet neu und verbindet sich mit dem Internet.",
+      guide_step4_title: "4. Diese Seite zum Homescreen hinzufügen",
+      guide_step4_android: "Öffne diese Seite in Chrome → Menü (drei Punkte oben rechts) → <b>„Zum Startbildschirm hinzufügen“</b> / <b>„App installieren“</b>.",
+      guide_step4_ios: "Öffne diese Seite in Safari → Teilen-Symbol (Quadrat mit Pfeil nach oben) → <b>„Zum Home-Bildschirm“</b>.",
+      guide_step4_p2: "Ab jetzt reicht ein Tipp auf das Symbol auf dem Homescreen – öffnet direkt die Whirlpool-Steuerung, im Vollbild, ohne Adressleiste. Beim ersten Öffnen die MQTT-Zugangsdaten aus Schritt 2 über ⚙ eingeben.",
+      guide_cloud_title: "Was das „Cloud“-Verbindungssymbol bedeutet",
+      guide_cloud_p1: "Diese App spricht über den MQTT-Broker <b>HiveMQ Cloud</b> mit dem Whirlpool (ein kostenloser Dienst, nicht von Intex). Er ist nur ein „Briefkasten in der Mitte“ – der ESP32 sendet dort den Status hin, die App sendet dort Befehle hin; die eigentliche Logik (Zeitpläne, Timing) läuft weiterhin auf dem ESP32 zu Hause, nicht in der Cloud.",
+      guide_cloud_p2: "Deshalb funktioniert die App zu Hause und unterwegs gleich und ist unabhängig von Intex und deren App."
     }
   };
 
@@ -783,6 +922,21 @@
       publish(TOPIC_TIME_SET, JSON.stringify({ mode: "auto" }));
     }
   });
+
+  // ===================== Návod: přepínač Android / iOS =====================
+  function setGuideOS(os) {
+    document.querySelectorAll(".os-android").forEach((el) => { el.style.display = os === "android" ? "" : "none"; });
+    document.querySelectorAll(".os-ios").forEach((el) => { el.style.display = os === "ios" ? "" : "none"; });
+    document.getElementById("osAndroidBtn").classList.toggle("active", os === "android");
+    document.getElementById("osIosBtn").classList.toggle("active", os === "ios");
+    localStorage.setItem("intexspa_guide_os", os);
+  }
+  document.getElementById("osAndroidBtn").addEventListener("click", () => setGuideOS("android"));
+  document.getElementById("osIosBtn").addEventListener("click", () => setGuideOS("ios"));
+
+  const savedOS = localStorage.getItem("intexspa_guide_os");
+  const detectedOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : "android";
+  setGuideOS(savedOS || detectedOS);
 
   // ===================== Boot =====================
   applyI18n();
