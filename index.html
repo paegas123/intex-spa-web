@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vířivka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+  :root {
+    --bg: #071019;
+    --bg-panel: #0e1e2b;
+    --bg-panel-raised: #122636;
+    --border: #1c3548;
+    --text: #eaf4f8;
+    --text-muted: #6f8ea0;
+    --accent: #2dd4ee;
+    --warm: #ff7a52;
+    --danger: #ff5566;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; min-height: 100%;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 50% -10%, #0f2836 0%, transparent 55%);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 20px 16px 60px; min-height: 100vh; }
+
+  /* ---------- Header ---------- */
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  header h1 { font-size: 17px; font-weight: 600; margin: 0; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .lang-switch { display: flex; gap: 3px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .lang-switch button {
+    background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 600;
+    padding: 5px 7px; border-radius: 6px; cursor: pointer; font-family: inherit;
+  }
+  .lang-switch button.active { background: var(--accent); color: #04222b; }
+  .conn-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger); box-shadow: 0 0 8px currentColor; transition: background 0.3s;
+  }
+  .conn-dot.ok { background: var(--accent); }
+  .conn-dot.warm { background: var(--warm); }
+  .conn-label { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .gear { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 2px 4px; line-height: 1; }
+  .gear:hover { color: var(--text); }
+
+  /* ---------- Tabs ---------- */
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+  .tab-btn {
+    flex: 1; background: none; border: none; color: var(--text-muted); font-family: inherit;
+    font-size: 13px; font-weight: 500; padding: 9px 6px; border-radius: 9px; cursor: pointer;
+  }
+  .tab-btn.active { background: var(--bg-panel-raised); color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---------- Temperature display ---------- */
+  .temp-panel {
+    background: linear-gradient(180deg, var(--bg-panel-raised), var(--bg-panel));
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 26px 20px 20px; text-align: center; position: relative; overflow: hidden; margin-bottom: 14px;
+  }
+  .temp-panel::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+  }
+  .temp-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .temp-current {
+    font-family: 'Share Tech Mono', monospace; font-size: 72px; line-height: 1; color: var(--accent);
+    text-shadow: 0 0 18px rgba(45,212,238,0.45), 0 0 40px rgba(45,212,238,0.15); letter-spacing: 0.02em;
+  }
+  .temp-current.heating { color: var(--warm); text-shadow: 0 0 18px rgba(255,122,82,0.45), 0 0 40px rgba(255,122,82,0.15); }
+  .temp-current .unit { font-size: 26px; opacity: 0.6; margin-left: 4px; }
+  .temp-current.na { color: var(--text-muted); text-shadow: none; font-size: 38px; }
+  .target-row { margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .target-row .lbl { font-size: 11px; color: var(--text-muted); }
+  .target-value { font-family: 'Share Tech Mono', monospace; font-size: 22px; min-width: 58px; }
+  .stepper {
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-panel-raised);
+    color: var(--text); font-size: 19px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; user-select: none; transition: border-color 0.15s, transform 0.1s;
+  }
+  .stepper:active { transform: scale(0.92); }
+  .stepper:hover { border-color: var(--accent); }
+  .error-banner {
+    margin-top: 12px; background: rgba(255,85,102,0.12); border: 1px solid rgba(255,85,102,0.4);
+    color: var(--danger); border-radius: 10px; padding: 8px 12px; font-size: 13px; display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* ---------- Function toggles ---------- */
+  .functions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .fn-btn {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 15px 13px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 9px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .fn-btn:active { transform: scale(0.98); }
+  .fn-icon { font-size: 19px; }
+  .fn-name { font-size: 13px; font-weight: 500; }
+  .fn-state { font-size: 11px; color: var(--text-muted); letter-spacing: 0.03em; }
+  .fn-btn.on { border-color: var(--accent); background: linear-gradient(180deg, rgba(45,212,238,0.10), rgba(45,212,238,0.03)); }
+  .fn-btn.on .fn-state { color: var(--accent); }
+  .fn-btn.heater.on { border-color: var(--warm); background: linear-gradient(180deg, rgba(255,122,82,0.12), rgba(255,122,82,0.03)); }
+  .fn-btn.heater.on .fn-state { color: var(--warm); }
+  .fn-btn.pending { opacity: 0.55; pointer-events: none; }
+
+  /* ---------- Schedule tab ---------- */
+  .sched-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .sched-card {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .sched-card.disabled { opacity: 0.45; }
+  .sched-main { display: flex; flex-direction: column; gap: 5px; }
+  .sched-fn { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .sched-time { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--text-muted); }
+  .sched-days { display: flex; gap: 4px; margin-top: 2px; }
+  .day-dot {
+    width: 18px; height: 18px; border-radius: 50%; font-size: 9px; display: flex; align-items: center;
+    justify-content: center; background: var(--bg-panel-raised); color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .day-dot.active { background: var(--accent); color: #04222b; border-color: var(--accent); font-weight: 700; }
+  .sched-actions { display: flex; gap: 6px; align-items: center; }
+  .icon-btn {
+    background: var(--bg-panel-raised); border: 1px solid var(--border); border-radius: 9px; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 15px;
+  }
+  .icon-btn:hover { color: var(--text); }
+  .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+  .add-btn {
+    width: 100%; background: var(--bg-panel); border: 1px dashed var(--border); border-radius: 14px;
+    padding: 13px; color: var(--accent); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .add-btn:hover { border-color: var(--accent); }
+  .empty-hint { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 10px; }
+
+  /* ---------- Settings tab ---------- */
+  .settings-card {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px;
+  }
+  .settings-card h3 { font-size: 13px; margin: 0 0 4px; color: var(--text); }
+  .settings-card p.hint { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; }
+  .clock-display {
+    font-family: 'Share Tech Mono', monospace; font-size: 22px; color: var(--accent); text-align: center; padding: 10px 0;
+  }
+  .radio-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .radio-opt {
+    flex: 1; border: 1px solid var(--border); background: var(--bg-panel-raised); border-radius: 10px; padding: 10px;
+    text-align: center; font-size: 13px; cursor: pointer; color: var(--text-muted);
+  }
+  .radio-opt.active { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- Modal (shared) ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(2,8,14,0.72); display: none; align-items: center;
+    justify-content: center; padding: 20px; z-index: 10; overflow-y: auto;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal { background: var(--bg-panel-raised); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; width: 100%; max-width: 380px; margin: auto; }
+  .modal h2 { font-size: 16px; margin: 0 0 4px; }
+  .modal p.hint { font-size: 12px; color: var(--text-muted); margin: 0 0 16px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+  .field input, .field select {
+    width: 100%; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 11px; color: var(--text); font-size: 14px; font-family: inherit;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .day-picker { display: flex; gap: 5px; justify-content: space-between; }
+  .day-picker .dbtn {
+    flex: 1; padding: 9px 0; text-align: center; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg-panel); font-size: 11px; cursor: pointer; color: var(--text-muted);
+  }
+  .day-picker .dbtn.active { background: var(--accent); color: #04222b; border-color: var(--accent); font-weight: 700; }
+  .field-row { display: flex; gap: 10px; }
+  .field-row .field { flex: 1; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .checkbox-row input { width: auto; }
+  .field-error { display: none; font-size: 12px; color: var(--danger); margin-top: 4px; }
+  .field-error.show { display: block; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .btn { flex: 1; border: none; border-radius: 10px; padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-primary { background: var(--accent); color: #04222b; }
+  .btn-secondary { background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border); }
+
+  .footer-note { margin-top: 20px; text-align: center; font-size: 11px; color: var(--text-muted); opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1 data-i18n="app_title">Vířivka</h1>
+    <div class="header-right">
+      <div class="lang-switch">
+        <button data-lang="cs">CZ</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="de">DE</button>
+      </div>
+      <span class="conn-label"><span class="conn-dot" id="connDot"></span><span id="connLabel">…</span></span>
+      <button class="gear" id="gearBtn" title="Nastavení připojení">⚙</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="control" data-i18n="tab_control">Ovládání</button>
+    <button class="tab-btn" data-tab="schedule" data-i18n="tab_schedule">Plány</button>
+    <button class="tab-btn" data-tab="settings" data-i18n="tab_settings">Nastavení</button>
+  </div>
+
+  <!-- ============== TAB: Ovládání ============== -->
+  <div class="tab-panel active" id="tab-control">
+    <div class="temp-panel">
+      <div class="temp-label" data-i18n="current_temp">Aktuální teplota</div>
+      <div class="temp-current na" id="currentTemp">– –</div>
+      <div class="error-banner" id="errorBanner"></div>
+      <div class="target-row">
+        <div class="stepper" id="tempDown">–</div>
+        <div>
+          <div class="lbl" data-i18n="target">cíl</div>
+          <div class="target-value" id="targetTemp">--°</div>
+        </div>
+        <div class="stepper" id="tempUp">+</div>
+      </div>
+    </div>
+
+    <div class="functions" id="functions">
+      <div class="fn-btn" data-fn="power">
+        <div class="fn-icon">⏻</div>
+        <div class="fn-name" data-i18n="fn_power">Napájení</div>
+        <div class="fn-state" data-i18n="off">vypnuto</div>
+      </div>
+      <div class="fn-btn heater" data-fn="heater">
+        <div class="fn-icon">🔥</div>
+        <div class="fn-name" data-i18n="fn_heater">Ohřev</div>
+        <div class="fn-state" data-i18n="off">vypnuto</div>
+      </div>
+      <div class="fn-btn" data-fn="filter">
+        <div class="fn-icon">♻</div>
+        <div class="fn-name" data-i18n="fn_filter">Filtrace</div>
+        <div class="fn-state" data-i18n="off">vypnuto</div>
+      </div>
+      <div class="fn-btn" data-fn="bubbles">
+        <div class="fn-icon">◌</div>
+        <div class="fn-name" data-i18n="fn_bubbles">Bubliny</div>
+        <div class="fn-state" data-i18n="off">vypnuto</div>
+      </div>
+      <div class="fn-btn" data-fn="jets">
+        <div class="fn-icon">≈</div>
+        <div class="fn-name" data-i18n="fn_jets">Trysky</div>
+        <div class="fn-state" data-i18n="off">vypnuto</div>
+      </div>
+      <div class="fn-btn" data-fn="sanitizer">
+        <div class="fn-icon">⬡</div>
+        <div class="fn-name" data-i18n="fn_sanitizer">Solinátor</div>
+        <div class="fn-state" data-i18n="off">vypnuto</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TAB: Plány ============== -->
+  <div class="tab-panel" id="tab-schedule">
+    <div class="sched-list" id="schedList"></div>
+    <button class="add-btn" id="addSchedBtn" data-i18n="add_schedule">+ Přidat plán</button>
+  </div>
+
+  <!-- ============== TAB: Nastavení ============== -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="settings-card">
+      <h3 data-i18n="esp_time">Aktuální čas ESP32</h3>
+      <p class="hint" data-i18n="esp_time_hint">Podle tohoto času se řídí plány. Pokud neodpovídá realitě, uprav časové pásmo níže.</p>
+      <div class="clock-display" id="clockDisplay">--:--:--</div>
+    </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="timezone">Časové pásmo</h3>
+      <p class="hint" data-i18n="timezone_hint">Automaticky = zjistí se podle veřejné IP adresy ESP32.</p>
+      <div class="radio-row">
+        <div class="radio-opt active" id="tzAutoBtn" data-i18n="auto">Automaticky</div>
+        <div class="radio-opt" id="tzManualBtn" data-i18n="manual">Ručně</div>
+      </div>
+      <div class="field" id="tzOffsetField" style="display:none;">
+        <label data-i18n="offset_hours">Posun oproti UTC (hodiny)</label>
+        <input type="number" id="tzOffsetInput" step="0.5" value="1">
+      </div>
+      <button class="btn btn-primary" id="tzSaveBtn" style="width:100%;" data-i18n="save">Uložit</button>
+    </div>
+  </div>
+
+  <div class="footer-note">intexspa • přímé MQTT spojení, bez appky</div>
+</div>
+
+<!-- ============== Modal: Nastavení připojení ============== -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <h2 data-i18n="conn_title">Připojení k brokeru</h2>
+    <p class="hint" data-i18n="conn_hint">Údaje se uloží jen v tomto prohlížeči.</p>
+    <div class="field"><label data-i18n="broker_host">Adresa brokeru</label><input type="text" id="fHost" placeholder="xxxxxxx.s1.eu.hivemq.cloud"></div>
+    <div class="field"><label data-i18n="broker_port">WebSocket port</label><input type="text" id="fPort" placeholder="8884"></div>
+    <div class="field"><label data-i18n="username">Uživatelské jméno</label><input type="text" id="fUser" placeholder="Intex"></div>
+    <div class="field"><label data-i18n="password">Heslo</label><input type="password" id="fPass" placeholder="••••••••"></div>
+    <div class="field-error" id="settingsError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelSettings" data-i18n="cancel">Zrušit</button>
+      <button class="btn btn-primary" id="saveSettings" data-i18n="save_connect">Uložit a připojit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============== Modal: Přidat/upravit plán ============== -->
+<div class="modal-backdrop" id="schedModal">
+  <div class="modal">
+    <h2 id="schedModalTitle" data-i18n="new_schedule">Nový plán</h2>
+    <div class="field">
+      <label data-i18n="function">Funkce</label>
+      <select id="sFunction">
+        <option value="filter" data-i18n="fn_filter">Filtrace</option>
+        <option value="heater" data-i18n="fn_heater">Ohřev</option>
+        <option value="sanitizer" data-i18n="fn_sanitizer">Solinátor</option>
+      </select>
+    </div>
+    <div class="field">
+      <label data-i18n="days">Dny</label>
+      <div class="day-picker" id="dayPicker"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="start_time">Čas spuštění</label>
+        <input type="time" id="sStart" value="08:00">
+      </div>
+      <div class="field">
+        <label data-i18n="duration_h">Délka (hod)</label>
+        <input type="number" id="sDuration" min="0.5" step="0.5" value="3">
+      </div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="sEnabled" checked>
+      <label for="sEnabled" data-i18n="enabled">Aktivní</label>
+    </div>
+    <div class="field-error" id="schedError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelSched" data-i18n="cancel">Zrušit</button>
+      <button class="btn btn-primary" id="saveSched" data-i18n="save">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===================== Překlady =====================
+  const I18N = {
+    cs: {
+      app_title: "Vířivka", tab_control: "Ovládání", tab_schedule: "Plány", tab_settings: "Nastavení",
+      current_temp: "Aktuální teplota", target: "cíl", off: "vypnuto", on: "zapnuto",
+      fn_power: "Napájení", fn_heater: "Ohřev", fn_filter: "Filtrace", fn_bubbles: "Bubliny",
+      fn_jets: "Trysky", fn_sanitizer: "Solinátor",
+      add_schedule: "+ Přidat plán", no_schedules: "Zatím žádné plány.",
+      esp_time: "Aktuální čas ESP32", esp_time_hint: "Podle tohoto času se řídí plány. Pokud neodpovídá realitě, uprav časové pásmo níže.",
+      timezone: "Časové pásmo", timezone_hint: "Automaticky = zjistí se podle veřejné IP adresy ESP32.",
+      auto: "Automaticky", manual: "Ručně", offset_hours: "Posun oproti UTC (hodiny)", save: "Uložit",
+      conn_title: "Připojení k brokeru", conn_hint: "Údaje se uloží jen v tomto prohlížeči.",
+      broker_host: "Adresa brokeru", broker_port: "WebSocket port", username: "Uživatelské jméno", password: "Heslo",
+      cancel: "Zrušit", save_connect: "Uložit a připojit",
+      new_schedule: "Nový plán", edit_schedule: "Upravit plán", function: "Funkce", days: "Dny",
+      start_time: "Čas spuštění", duration_h: "Délka (hod)", enabled: "Aktivní",
+      day_short: ["Po","Út","St","Čt","Pá","So","Ne"],
+      err_host: "Vyplň adresu brokeru.", err_user: "Vyplň uživatelské jméno.",
+      err_days: "Vyber aspoň jeden den.", err_mqtt_lib: "Knihovna MQTT se nenačetla (chybí internet nebo ji blokuje prohlížeč).",
+      connecting: "Připojuji…", connected: "Připojeno", disconnected: "Odpojeno", bridge_offline: "Bridge offline",
+      conn_error: "Chyba připojení", not_set: "Nenastaveno"
+    },
+    en: {
+      app_title: "Spa", tab_control: "Control", tab_schedule: "Schedules", tab_settings: "Settings",
+      current_temp: "Current temperature", target: "target", off: "off", on: "on",
+      fn_power: "Power", fn_heater: "Heater", fn_filter: "Filter", fn_bubbles: "Bubbles",
+      fn_jets: "Jets", fn_sanitizer: "Sanitizer",
+      add_schedule: "+ Add schedule", no_schedules: "No schedules yet.",
+      esp_time: "ESP32 current time", esp_time_hint: "Schedules run based on this clock. If it looks wrong, adjust the timezone below.",
+      timezone: "Timezone", timezone_hint: "Automatic = detected from the ESP32's public IP address.",
+      auto: "Automatic", manual: "Manual", offset_hours: "UTC offset (hours)", save: "Save",
+      conn_title: "Broker connection", conn_hint: "Saved only in this browser.",
+      broker_host: "Broker address", broker_port: "WebSocket port", username: "Username", password: "Password",
+      cancel: "Cancel", save_connect: "Save & connect",
+      new_schedule: "New schedule", edit_schedule: "Edit schedule", function: "Function", days: "Days",
+      start_time: "Start time", duration_h: "Duration (h)", enabled: "Enabled",
+      day_short: ["Mo","Tu","We","Th","Fr","Sa","Su"],
+      err_host: "Enter the broker address.", err_user: "Enter a username.",
+      err_days: "Pick at least one day.", err_mqtt_lib: "MQTT library failed to load (no internet or blocked by browser).",
+      connecting: "Connecting…", connected: "Connected", disconnected: "Disconnected", bridge_offline: "Bridge offline",
+      conn_error: "Connection error", not_set: "Not set up"
+    },
+    de: {
+      app_title: "Whirlpool", tab_control: "Steuerung", tab_schedule: "Zeitpläne", tab_settings: "Einstellungen",
+      current_temp: "Aktuelle Temperatur", target: "Ziel", off: "aus", on: "an",
+      fn_power: "Strom", fn_heater: "Heizung", fn_filter: "Filter", fn_bubbles: "Blasen",
+      fn_jets: "Düsen", fn_sanitizer: "Salzelektrolyse",
+      add_schedule: "+ Zeitplan hinzufügen", no_schedules: "Noch keine Zeitpläne.",
+      esp_time: "Aktuelle Zeit (ESP32)", esp_time_hint: "Zeitpläne richten sich nach dieser Uhr. Falls falsch, Zeitzone unten anpassen.",
+      timezone: "Zeitzone", timezone_hint: "Automatisch = anhand der öffentlichen IP-Adresse des ESP32 ermittelt.",
+      auto: "Automatisch", manual: "Manuell", offset_hours: "UTC-Versatz (Stunden)", save: "Speichern",
+      conn_title: "Broker-Verbindung", conn_hint: "Wird nur in diesem Browser gespeichert.",
+      broker_host: "Broker-Adresse", broker_port: "WebSocket-Port", username: "Benutzername", password: "Passwort",
+      cancel: "Abbrechen", save_connect: "Speichern & verbinden",
+      new_schedule: "Neuer Zeitplan", edit_schedule: "Zeitplan bearbeiten", function: "Funktion", days: "Tage",
+      start_time: "Startzeit", duration_h: "Dauer (Std)", enabled: "Aktiv",
+      day_short: ["Mo","Di","Mi","Do","Fr","Sa","So"],
+      err_host: "Broker-Adresse eingeben.", err_user: "Benutzernamen eingeben.",
+      err_days: "Mindestens einen Tag wählen.", err_mqtt_lib: "MQTT-Bibliothek konnte nicht geladen werden (kein Internet oder vom Browser blockiert).",
+      connecting: "Verbinde…", connected: "Verbunden", disconnected: "Getrennt", bridge_offline: "Bridge offline",
+      conn_error: "Verbindungsfehler", not_set: "Nicht eingerichtet"
+    }
+  };
+
+  let lang = localStorage.getItem("intexspa_lang") || "cs";
+  function t(key) { return (I18N[lang] && I18N[lang][key]) || I18N.cs[key] || key; }
+
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll(".lang-switch button").forEach((b) => {
+      b.classList.toggle("active", b.dataset.lang === lang);
+    });
+    renderFunctionStates();
+    renderSchedules();
+    renderDayPicker();
+  }
+
+  document.querySelectorAll(".lang-switch button").forEach((b) => {
+    b.addEventListener("click", () => {
+      lang = b.dataset.lang;
+      localStorage.setItem("intexspa_lang", lang);
+      applyI18n();
+    });
+  });
+
+  // ===================== Tabs =====================
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ===================== MQTT konstanty =====================
+  const TOPIC_STATUS = "intexspa/status";
+  const TOPIC_AVAIL = "intexspa/available";
+  const TOPIC_SET = "intexspa/set";
+  const TOPIC_SCHED_LIST = "intexspa/schedule/list";
+  const TOPIC_SCHED_SET = "intexspa/schedule/set";
+  const TOPIC_SCHED_REQUEST = "intexspa/schedule/request";
+  const TOPIC_TIME = "intexspa/settings/time";
+  const TOPIC_TIME_SET = "intexspa/settings/time/set";
+
+  const STORAGE_KEY = "intexspa_mqtt_config";
+  let client = null;
+  let state = { valid: false };
+  let pendingTargetTemp = null;
+  let schedules = [];
+  let timeInfo = { mode: "auto", offset_minutes: 0, synced: false, local_time: "-" };
+
+  // ===================== DOM refs =====================
+  const connDot = document.getElementById("connDot");
+  const connLabel = document.getElementById("connLabel");
+  const currentTempEl = document.getElementById("currentTemp");
+  const targetTempEl = document.getElementById("targetTemp");
+  const errorBanner = document.getElementById("errorBanner");
+  const functionsEl = document.getElementById("functions");
+  const settingsModal = document.getElementById("settingsModal");
+  const schedModal = document.getElementById("schedModal");
+  const schedListEl = document.getElementById("schedList");
+  const dayPickerEl = document.getElementById("dayPicker");
+  const clockDisplay = document.getElementById("clockDisplay");
+
+  // ===================== Config storage =====================
+  function loadConfig() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch (e) { return null; } }
+  function saveConfig(cfg) { localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); }
+
+  function openSettings() {
+    const cfg = loadConfig() || {};
+    document.getElementById("fHost").value = cfg.host || "";
+    document.getElementById("fPort").value = cfg.port || "8884";
+    document.getElementById("fUser").value = cfg.user || "";
+    document.getElementById("fPass").value = cfg.pass || "";
+    settingsModal.classList.add("show");
+  }
+  function closeSettings() { settingsModal.classList.remove("show"); }
+
+  const settingsError = document.getElementById("settingsError");
+  function showSettingsError(msg) { settingsError.textContent = msg; settingsError.classList.add("show"); }
+  function clearSettingsError() { settingsError.classList.remove("show"); settingsError.textContent = ""; }
+
+  document.getElementById("gearBtn").addEventListener("click", () => { clearSettingsError(); openSettings(); });
+  document.getElementById("cancelSettings").addEventListener("click", closeSettings);
+  document.getElementById("saveSettings").addEventListener("click", () => {
+    clearSettingsError();
+    if (typeof mqtt === "undefined") { showSettingsError(t("err_mqtt_lib")); return; }
+    const cfg = {
+      host: document.getElementById("fHost").value.trim(),
+      port: document.getElementById("fPort").value.trim() || "8884",
+      user: document.getElementById("fUser").value.trim(),
+      pass: document.getElementById("fPass").value
+    };
+    if (!cfg.host) { showSettingsError(t("err_host")); return; }
+    if (!cfg.user) { showSettingsError(t("err_user")); return; }
+    saveConfig(cfg);
+    closeSettings();
+    connect(cfg);
+  });
+
+  // ===================== Connection status =====================
+  function setConnStatus(mode, textKey) {
+    connDot.className = "conn-dot" + (mode === "ok" ? " ok" : mode === "warm" ? " warm" : "");
+    connLabel.textContent = t(textKey);
+  }
+
+  // ===================== MQTT =====================
+  function connect(cfg) {
+    if (client) { try { client.end(true); } catch (e) {} }
+    setConnStatus("", "connecting");
+    if (typeof mqtt === "undefined") { setConnStatus("", "err_mqtt_lib"); return; }
+
+    const url = "wss://" + cfg.host + ":" + cfg.port + "/mqtt";
+    try {
+      client = mqtt.connect(url, {
+        username: cfg.user, password: cfg.pass,
+        clientId: "intexspa-web-" + Math.random().toString(16).slice(2, 10),
+        reconnectPeriod: 4000, connectTimeout: 8000
+      });
+    } catch (e) { console.error(e); setConnStatus("", "conn_error"); return; }
+
+    client.on("connect", () => {
+      setConnStatus("ok", "connected");
+      client.subscribe(TOPIC_STATUS);
+      client.subscribe(TOPIC_AVAIL);
+      client.subscribe(TOPIC_SCHED_LIST);
+      client.subscribe(TOPIC_TIME);
+      client.publish(TOPIC_SCHED_REQUEST, "1");
+    });
+    client.on("reconnect", () => setConnStatus("", "connecting"));
+    client.on("close", () => setConnStatus("", "disconnected"));
+    client.on("offline", () => setConnStatus("", "disconnected"));
+    client.on("error", (err) => { console.error("MQTT chyba:", err); setConnStatus("", "conn_error"); });
+
+    client.on("message", (topic, payload) => {
+      const str = payload.toString();
+      try {
+        if (topic === TOPIC_STATUS) onStatus(JSON.parse(str));
+        else if (topic === TOPIC_AVAIL) setConnStatus(str === "online" ? "ok" : "warm", str === "online" ? "connected" : "bridge_offline");
+        else if (topic === TOPIC_SCHED_LIST) { schedules = JSON.parse(str); renderSchedules(); }
+        else if (topic === TOPIC_TIME) { timeInfo = JSON.parse(str); renderTime(); }
+      } catch (e) { console.error("Chyba zpracovani zpravy", topic, e); }
+    });
+  }
+
+  function publish(topic, value) { if (client && client.connected) client.publish(topic, String(value)); }
+  function publishSet(fn, value) { publish(TOPIC_SET + "/" + fn, value); }
+  function publishSchedules() { publish(TOPIC_SCHED_SET, JSON.stringify(schedules)); }
+
+  // ===================== Ovládání: rendering =====================
+  function onStatus(s) {
+    state = s;
+    pendingTargetTemp = null;
+    if (!s.valid) {
+      currentTempEl.textContent = "– –";
+      currentTempEl.className = "temp-current na";
+      targetTempEl.textContent = "--°";
+    } else if (s.error_code) {
+      currentTempEl.textContent = s.error_code;
+      currentTempEl.className = "temp-current na";
+      errorBanner.textContent = s.error_code;
+      errorBanner.classList.add("show");
+    } else {
+      errorBanner.classList.remove("show");
+      currentTempEl.innerHTML = s.current_temp + '<span class="unit">°' + s.unit + '</span>';
+      currentTempEl.className = "temp-current" + (s.heater ? " heating" : "");
+      targetTempEl.textContent = s.preset_temp + "°" + s.unit;
+    }
+    renderFunctionStates();
+  }
+
+  function renderFunctionStates() {
+    document.querySelectorAll(".fn-btn").forEach((btn) => {
+      const fn = btn.dataset.fn;
+      const on = !!state[fn];
+      btn.classList.toggle("on", on);
+      btn.classList.remove("pending");
+      btn.querySelector(".fn-state").textContent = t(on ? "on" : "off");
+    });
+  }
+
+  functionsEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".fn-btn");
+    if (!btn || !state.valid) return;
+    const fn = btn.dataset.fn;
+    btn.classList.add("pending");
+    publishSet(fn, state[fn] ? 0 : 1);
+  });
+
+  document.getElementById("tempUp").addEventListener("click", () => {
+    if (!state.valid) return;
+    const base = pendingTargetTemp !== null ? pendingTargetTemp : state.preset_temp;
+    pendingTargetTemp = base + 1;
+    targetTempEl.textContent = pendingTargetTemp + "°" + state.unit;
+    publishSet("preset_temp", pendingTargetTemp);
+  });
+  document.getElementById("tempDown").addEventListener("click", () => {
+    if (!state.valid) return;
+    const base = pendingTargetTemp !== null ? pendingTargetTemp : state.preset_temp;
+    pendingTargetTemp = base - 1;
+    targetTempEl.textContent = pendingTargetTemp + "°" + state.unit;
+    publishSet("preset_temp", pendingTargetTemp);
+  });
+
+  // ===================== Plány: rendering =====================
+  const FN_ICON = { filter: "♻", heater: "🔥", sanitizer: "⬡" };
+
+  function fmtTime(h, m) { return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0"); }
+  function fmtDuration(min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    if (m === 0) return h + "h";
+    return h + "h " + m + "m";
+  }
+
+  function renderSchedules() {
+    schedListEl.innerHTML = "";
+    if (schedules.length === 0) {
+      const p = document.createElement("div");
+      p.className = "empty-hint";
+      p.textContent = t("no_schedules");
+      schedListEl.appendChild(p);
+      return;
+    }
+    schedules.forEach((s) => {
+      const card = document.createElement("div");
+      card.className = "sched-card" + (s.enabled ? "" : " disabled");
+
+      const main = document.createElement("div");
+      main.className = "sched-main";
+
+      const fnRow = document.createElement("div");
+      fnRow.className = "sched-fn";
+      fnRow.innerHTML = "<span>" + (FN_ICON[s.function] || "") + "</span><span>" + t("fn_" + s.function) + "</span>";
+      main.appendChild(fnRow);
+
+      const timeRow = document.createElement("div");
+      timeRow.className = "sched-time";
+      timeRow.textContent = fmtTime(s.start_hour, s.start_minute) + " · " + fmtDuration(s.duration_min);
+      main.appendChild(timeRow);
+
+      const daysRow = document.createElement("div");
+      daysRow.className = "sched-days";
+      for (let i = 0; i < 7; i++) {
+        const dot = document.createElement("div");
+        dot.className = "day-dot" + ((s.days & (1 << i)) ? " active" : "");
+        dot.textContent = t("day_short")[i][0];
+        daysRow.appendChild(dot);
+      }
+      main.appendChild(daysRow);
+
+      const actions = document.createElement("div");
+      actions.className = "sched-actions";
+      const editBtn = document.createElement("div");
+      editBtn.className = "icon-btn"; editBtn.textContent = "✎";
+      editBtn.addEventListener("click", () => openSchedModal(s));
+      const delBtn = document.createElement("div");
+      delBtn.className = "icon-btn danger"; delBtn.textContent = "🗑";
+      delBtn.addEventListener("click", () => {
+        schedules = schedules.filter((x) => x.id !== s.id);
+        renderSchedules();
+        publishSchedules();
+      });
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      card.appendChild(main);
+      card.appendChild(actions);
+      schedListEl.appendChild(card);
+    });
+  }
+
+  // ---- Modal: pridat/upravit plan ----
+  let editingId = null;
+  let selectedDays = 0;
+
+  function renderDayPicker() {
+    dayPickerEl.innerHTML = "";
+    for (let i = 0; i < 7; i++) {
+      const btn = document.createElement("div");
+      btn.className = "dbtn" + ((selectedDays & (1 << i)) ? " active" : "");
+      btn.textContent = t("day_short")[i];
+      btn.addEventListener("click", () => {
+        selectedDays ^= (1 << i);
+        renderDayPicker();
+      });
+      dayPickerEl.appendChild(btn);
+    }
+  }
+
+  function openSchedModal(existing) {
+    editingId = existing ? existing.id : null;
+    document.getElementById("schedModalTitle").textContent = t(existing ? "edit_schedule" : "new_schedule");
+    document.getElementById("sFunction").value = existing ? existing.function : "filter";
+    selectedDays = existing ? existing.days : 0;
+    renderDayPicker();
+    document.getElementById("sStart").value = existing ? fmtTime(existing.start_hour, existing.start_minute) : "08:00";
+    document.getElementById("sDuration").value = existing ? (existing.duration_min / 60) : 3;
+    document.getElementById("sEnabled").checked = existing ? !!existing.enabled : true;
+    document.getElementById("schedError").classList.remove("show");
+    schedModal.classList.add("show");
+  }
+  function closeSchedModal() { schedModal.classList.remove("show"); }
+
+  document.getElementById("addSchedBtn").addEventListener("click", () => openSchedModal(null));
+  document.getElementById("cancelSched").addEventListener("click", closeSchedModal);
+  document.getElementById("saveSched").addEventListener("click", () => {
+    const errEl = document.getElementById("schedError");
+    errEl.classList.remove("show");
+    if (selectedDays === 0) { errEl.textContent = t("err_days"); errEl.classList.add("show"); return; }
+
+    const [hh, mm] = document.getElementById("sStart").value.split(":").map(Number);
+    const durationHours = parseFloat(document.getElementById("sDuration").value) || 1;
+
+    const entry = {
+      id: editingId || "",
+      function: document.getElementById("sFunction").value,
+      days: selectedDays,
+      start_hour: hh, start_minute: mm,
+      duration_min: Math.round(durationHours * 60),
+      enabled: document.getElementById("sEnabled").checked
+    };
+
+    if (editingId) {
+      schedules = schedules.map((s) => (s.id === editingId ? Object.assign({}, s, entry) : s));
+    } else {
+      entry.id = "web-" + Date.now().toString(16);
+      schedules.push(entry);
+    }
+    renderSchedules();
+    publishSchedules();
+    closeSchedModal();
+  });
+
+  // ===================== Nastavení: čas / časové pásmo =====================
+  function renderTime() {
+    clockDisplay.textContent = timeInfo.local_time || "--:--:--";
+    document.getElementById("tzAutoBtn").classList.toggle("active", timeInfo.mode !== "manual");
+    document.getElementById("tzManualBtn").classList.toggle("active", timeInfo.mode === "manual");
+    document.getElementById("tzOffsetField").style.display = timeInfo.mode === "manual" ? "block" : "none";
+    if (timeInfo.mode === "manual") {
+      document.getElementById("tzOffsetInput").value = (timeInfo.offset_minutes || 0) / 60;
+    }
+  }
+
+  document.getElementById("tzAutoBtn").addEventListener("click", () => {
+    timeInfo.mode = "auto";
+    renderTime();
+  });
+  document.getElementById("tzManualBtn").addEventListener("click", () => {
+    timeInfo.mode = "manual";
+    renderTime();
+  });
+  document.getElementById("tzSaveBtn").addEventListener("click", () => {
+    if (timeInfo.mode === "manual") {
+      const hours = parseFloat(document.getElementById("tzOffsetInput").value) || 0;
+      publish(TOPIC_TIME_SET, JSON.stringify({ mode: "manual", offset_minutes: Math.round(hours * 60) }));
+    } else {
+      publish(TOPIC_TIME_SET, JSON.stringify({ mode: "auto" }));
+    }
+  });
+
+  // ===================== Boot =====================
+  applyI18n();
+  const existing = loadConfig();
+  if (existing && existing.host && existing.user) {
+    connect(existing);
+  } else {
+    setConnStatus("", "not_set");
+    openSettings();
+  }
+})();
+</script>
+
+</body>
+</html>
