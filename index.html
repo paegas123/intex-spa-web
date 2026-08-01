@@ -269,8 +269,8 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="control" data-i18n="tab_control">Ovládání</button>
     <button class="tab-btn" data-tab="schedule" data-i18n="tab_schedule">Plány</button>
-    <button class="tab-btn" data-tab="errors" data-i18n="tab_errors">Chyby</button>
     <button class="tab-btn" data-tab="settings" data-i18n="tab_settings">Nastavení</button>
+    <button class="tab-btn" data-tab="errors" data-i18n="tab_errors">Chyby</button>
     <button class="tab-btn" data-tab="guide" data-i18n="tab_guide">Návod</button>
   </div>
 
@@ -343,21 +343,6 @@
     </div>
   </div>
 
-  <!-- ============== TAB: Chyby ============== -->
-  <div class="tab-panel" id="tab-errors">
-    <p class="hint" data-i18n="errors_hint">Posledních 10 zaznamenaných chyb. Červená blikající tečka = chyba právě trvá, modrá tečka = už odezněla.</p>
-    <div class="error-list" id="errorList"></div>
-    <p class="hint" id="errorsEmptyHint" data-i18n="errors_none" style="display:none;">Zatím žádné chyby.</p>
-
-    <div class="settings-card">
-      <h3 data-i18n="diag_title">Autodiagnostika a oprava</h3>
-      <button class="btn btn-primary" id="diagRunBtn" style="width:100%;" data-i18n="diag_run">Spustit autodiagnostiku</button>
-      <div id="diagResult" style="display:none;"></div>
-      <button class="btn btn-secondary" id="diagRetryBtn" style="width:100%;margin-top:10px;" data-i18n="diag_retry">Zkusit hned znovu (panel)</button>
-      <button class="btn btn-secondary" id="diagRestartBtn" style="width:100%;margin-top:10px;color:var(--danger);" data-i18n="diag_restart">Restartovat ESP32</button>
-    </div>
-  </div>
-
   <!-- ============== TAB: Nastavení ============== -->
   <div class="tab-panel" id="tab-settings">
     <div class="settings-card">
@@ -393,6 +378,21 @@
         </div>
       </div>
       <p class="hint" data-i18n="reliability_hint">Kolik z posledních dotazů na panel prošlo v pořádku, a jak dávno naposledy prošla komunikace. Síťové nastavení (WiFi, IP panelu, MQTT) se dělá na stránce 192.168.4.1, ne odsud.</p>
+    </div>
+  </div>
+
+  <!-- ============== TAB: Chyby ============== -->
+  <div class="tab-panel" id="tab-errors">
+    <p class="hint" data-i18n="errors_hint">Posledních 10 zaznamenaných chyb. Červená blikající tečka = chyba právě trvá, modrá tečka = už odezněla.</p>
+    <div class="error-list" id="errorList"></div>
+    <p class="hint" id="errorsEmptyHint" data-i18n="errors_none" style="display:none;">Zatím žádné chyby.</p>
+
+    <div class="settings-card">
+      <h3 data-i18n="diag_title">Autodiagnostika a oprava</h3>
+      <button class="btn btn-primary" id="diagRunBtn" style="width:100%;" data-i18n="diag_run">Spustit autodiagnostiku</button>
+      <div id="diagResult" style="display:none;"></div>
+      <button class="btn btn-secondary" id="diagRetryBtn" style="width:100%;margin-top:10px;" data-i18n="diag_retry">Zkusit hned znovu (panel)</button>
+      <button class="btn btn-secondary" id="diagRestartBtn" style="width:100%;margin-top:10px;color:var(--danger);" data-i18n="diag_restart">Restartovat ESP32</button>
     </div>
   </div>
 
@@ -851,18 +851,21 @@
   // "Pripojeno" (zelena) se ukaze jen kdyz jsou v poradku vsechny tri -
   // jinak by dashboard matoucne tvrdil "Pripojeno", i kdyz je vyrivka
   // fyzicky bez proudu a ESP32 s ni uz dlouho nemluvi.
+  //
+  // Bod 3 se urcuje primo z aktualniho seznamu chyb (currentErrorsList,
+  // viz sekce Chyby nize) - stejny zdroj pravdy, ktery pohani zaznam
+  // "panel_unreachable" i cervenou blikajici tecku v zalozce Chyby. Diky
+  // tomu obe indikace v UI reaguji uplne stejne rychle a nikdy si
+  // neodporuji (drivejsi verze pocitala "cerstvost" zvlast casovym
+  // odhadem, coz zpusobovalo, ze "Pripojeno" chvili svitilo zeleně i
+  // pote, co uz zalozka Chyby ukazovala aktivni chybu).
   let brokerState = "connecting";  // "connecting" | "connected" | "disconnected" | "error" | "err_mqtt_lib"
   let bridgeAvailable = null;      // null = jeste nevime, true/false
   let reliabilityData = null;
   let reliabilityReceivedAt = 0;
-  const PANEL_STALE_SEC = 45;  // o neco vic nez 2x POLL_INTERVAL_MS na ESP32 (20s), kvuli rezerve
 
-  function isPanelFresh() {
-    if (!reliabilityData) return false;
-    const secAgo = reliabilityData.last_contact_sec_ago;
-    if (secAgo == null || secAgo < 0) return false;
-    const elapsedSinceMsg = (Date.now() - reliabilityReceivedAt) / 1000;
-    return (secAgo + elapsedSinceMsg) <= PANEL_STALE_SEC;
+  function isPanelDown() {
+    return currentErrorsList.some((e) => e.type === "panel_unreachable" && e.ongoing);
   }
 
   function applyConnDot(mode, textKey) {
@@ -871,26 +874,12 @@
   }
 
   function recomputeConnDisplay() {
-    if (brokerState !== "connected") {
-      const map = { connecting: "connecting", disconnected: "disconnected", error: "conn_error", err_mqtt_lib: "err_mqtt_lib" };
-      applyConnDot("", map[brokerState] || "connecting");
-      return;
-    }
-    if (bridgeAvailable !== true) {
-      applyConnDot("warm", "bridge_offline");
-      return;
-    }
-    if (!isPanelFresh()) {
-      applyConnDot("warm", "panel_unreachable");
-      return;
-    }
-    applyConnDot("ok", "connected");
+    // Zjednodusene na dva stavy - detail proc je "Odpojeno" (broker,
+    // bridge, nebo panel) uzivatel najde v zalozce Chyby, tady staci
+    // jen ano/ne.
+    const allGood = (brokerState === "connected") && (bridgeAvailable === true) && !isPanelDown();
+    applyConnDot(allGood ? "ok" : "", allGood ? "connected" : "disconnected");
   }
-
-  // Prubezna kontrola i bez prichozich zprav - kdyby ESP32 prestalo
-  // odesilat spolehlivost (napr. zamrzly dotazy na panel), stav ma
-  // postupne zestarat i bez nove zpravy.
-  setInterval(recomputeConnDisplay, 5000);
 
   function setConnStatus(mode, textKey) {
     // Zpetna kompatibilita pro mista, ktera jeste volaji primo (napr.
@@ -1266,6 +1255,10 @@
     const anyOngoing = !!(list && list.some((e) => e.ongoing));
     const errDot = document.getElementById("errorsDot");
     errDot.className = anyOngoing ? "conn-dot blink" : "conn-dot blue";
+
+    // Hlavni indikator pripojeno/odpojeno zavisi mimo jine i na tom,
+    // jestli aktualne bezi chyba "panel_unreachable" - prepocitat hned.
+    recomputeConnDisplay();
   }
 
   // ===================== Autodiagnostika a oprava =====================
