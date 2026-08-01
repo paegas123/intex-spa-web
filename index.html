@@ -226,20 +226,6 @@
   .reliability-value.warn { color: var(--warm); }
   .reliability-value.bad { color: var(--danger); }
 
-  .power-slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-  .power-slider-row input[type="range"] {
-    flex: 1; -webkit-appearance: none; height: 5px; border-radius: 3px;
-    background: var(--bg-panel-raised); outline: none;
-  }
-  .power-slider-row input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
-    background: var(--accent); cursor: pointer; border: 2px solid var(--bg-panel-raised);
-  }
-  .power-slider-row input[type="range"]::-moz-range-thumb {
-    width: 20px; height: 20px; border-radius: 50%; background: var(--accent);
-    cursor: pointer; border: 2px solid var(--bg-panel-raised);
-  }
-  .power-slider-row .target-value { min-width: 46px; text-align: right; }
 </style>
 </head>
 <body>
@@ -272,11 +258,6 @@
         <span class="signal-label" data-i18n="signal_router">Router</span>
         <span class="signal-bar"><span class="signal-fill" id="signalHomeFill"></span></span>
         <span class="signal-pct" id="signalHomePct">--%</span>
-      </div>
-      <div class="signal-item">
-        <span class="signal-label" data-i18n="signal_panel">Panel</span>
-        <span class="signal-bar"><span class="signal-fill" id="signalPanelFill"></span></span>
-        <span class="signal-pct" id="signalPanelPct">--%</span>
       </div>
     </div>
 
@@ -362,9 +343,7 @@
     </div>
 
     <div class="settings-card">
-      <h3 data-i18n="txpower">Vysílací výkon WiFi</h3>
-      <p class="hint" data-i18n="txpower_hint">Jeden sdílený posuvník pro obě spojení (ESP32 má jedno rádio). I na 0 % zůstává minimální funkční výkon, nejde o úplné vypnutí.</p>
-
+      <h3 data-i18n="reliability_label">Spolehlivost spojení</h3>
       <div class="reliability-live">
         <div class="reliability-item">
           <span class="reliability-label" data-i18n="reliability_label">Spolehlivost spojení</span>
@@ -375,45 +354,7 @@
           <span class="reliability-value" id="lastContactValue">–</span>
         </div>
       </div>
-      <p class="hint" data-i18n="reliability_hint">Sleduj tohle po snížení výkonu – pokud tu za pár minut/hodin přibudou chyby nebo se poslední spojení dlouho neobnoví, výkon je moc nízký.</p>
-
-      <div class="power-slider-row">
-        <input type="range" id="txPowerSlider" min="0" max="100" step="5" value="100">
-        <span class="target-value" id="txPowerValue">100%</span>
-      </div>
-      <button class="btn btn-primary" id="txPowerSaveBtn" style="width:100%;" data-i18n="save">Uložit</button>
-    </div>
-
-    <div class="settings-card">
-      <h3 data-i18n="network_title">Síť (WiFi + MQTT)</h3>
-      <p class="hint" data-i18n="network_hint">Změna se ukládá do ESP32 a zařízení se poté restartuje. Pokud zadáš špatné údaje k domácí WiFi, ESP32 se už nepřipojí a bude potřeba ho znovu nastavit přes 192.168.4.1.</p>
-      <div class="field">
-        <label data-i18n="net_wifi_ssid">Domácí WiFi - název (SSID)</label>
-        <input type="text" id="netWifiSsid" placeholder="">
-      </div>
-      <div class="field">
-        <label data-i18n="net_wifi_pass">Domácí WiFi - heslo</label>
-        <input type="text" id="netWifiPass" placeholder="">
-      </div>
-      <div class="field">
-        <label data-i18n="broker_host">Adresa MQTT brokeru</label>
-        <input type="text" id="netMqttHost" placeholder="">
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label data-i18n="net_mqtt_port">MQTT port</label>
-          <input type="text" id="netMqttPort" placeholder="8883">
-        </div>
-        <div class="field">
-          <label data-i18n="username">MQTT uživatel</label>
-          <input type="text" id="netMqttUser" placeholder="">
-        </div>
-      </div>
-      <div class="field">
-        <label data-i18n="net_mqtt_pass">MQTT heslo</label>
-        <input type="text" id="netMqttPass" placeholder="">
-      </div>
-      <button class="btn btn-primary" id="netSaveBtn" style="width:100%;" data-i18n="net_save">Uložit a restartovat ESP32</button>
+      <p class="hint" data-i18n="reliability_hint">Kolik z posledních dotazů na panel prošlo v pořádku, a jak dávno naposledy prošla komunikace. Síťové nastavení (WiFi, IP panelu, MQTT) se dělá na stránce 192.168.4.1, ne odsud.</p>
     </div>
   </div>
 
@@ -584,18 +525,10 @@
       guide_cloud_title: "O čem je ta „cloud“ ikonka připojení",
       guide_cloud_p1: "Tahle appka mluví s vířivkou přes MQTT broker <b>HiveMQ Cloud</b> (zdarma služba, ne firma Intex). Je to jen „pošta uprostřed“ – ESP32 tam posílá stav, appka posílá příkazy, samotné rozhodování (plány, časování) běží pořád v ESP32 doma, ne v cloudu.",
       guide_cloud_p2: "Díky tomu appka funguje stejně doma i mimo domov, a nezávisí na Intexu ani na jejich appce.",
-      signal_router: "Router", signal_panel: "Panel",
-      txpower: "Vysílací výkon WiFi",
-      txpower_hint: "Jeden sdílený posuvník pro obě spojení (ESP32 má jedno rádio). I na 0 % zůstává minimální funkční výkon, nejde o úplné vypnutí.",
+      signal_router: "Router",
       reliability_label: "Spolehlivost spojení", last_contact_label: "Poslední spojení s panelem",
-      reliability_hint: "Sleduj tohle po snížení výkonu – pokud tu za pár minut/hodin přibudou chyby nebo se poslední spojení dlouho neobnoví, výkon je moc nízký.",
+      reliability_hint: "Kolik z posledních dotazů na panel prošlo v pořádku, a jak dávno naposledy prošla komunikace. Síťové nastavení (WiFi, IP panelu, MQTT) se dělá na stránce 192.168.4.1, ne odsud.",
       ago_prefix: "před", ago_suffix: "",
-      network_title: "Síť (WiFi + MQTT)",
-      network_hint: "Změna se ukládá do ESP32 a zařízení se poté restartuje. Pokud zadáš špatné údaje k domácí WiFi, ESP32 se už nepřipojí a bude potřeba ho znovu nastavit přes 192.168.4.1.",
-      net_wifi_ssid: "Domácí WiFi - název (SSID)", net_wifi_pass: "Domácí WiFi - heslo",
-      net_mqtt_port: "MQTT port", net_mqtt_pass: "MQTT heslo",
-      net_save: "Uložit a restartovat ESP32",
-      net_confirm: "Opravdu uložit? ESP32 se restartuje a na chvíli bude nedostupný. Špatné WiFi údaje ho odpojí od internetu.",
       backup_download: "⭳ Stáhnout zálohu", backup_upload: "⭱ Nahrát zálohu",
       backup_confirm: "Nahrát tuhle zálohu? Přepíše všechny aktuální plány.",
       backup_error: "Soubor se nepodařilo přečíst - není to platná záloha plánů."
@@ -648,18 +581,10 @@
       guide_cloud_title: "What that \"cloud\" connection is about",
       guide_cloud_p1: "This app talks to the spa through the <b>HiveMQ Cloud</b> MQTT broker (a free service, not Intex). It's just a \"mailbox in the middle\" – the ESP32 sends status there, the app sends commands there; the actual decision-making (schedules, timing) still runs on the ESP32 at home, not in the cloud.",
       guide_cloud_p2: "That's why the app works the same at home and away, and doesn't depend on Intex or their app.",
-      signal_router: "Router", signal_panel: "Panel",
-      txpower: "WiFi transmit power",
-      txpower_hint: "One shared slider for both links (the ESP32 has a single radio). Even at 0% a minimal working power level remains; it's not a full off switch.",
+      signal_router: "Router",
       reliability_label: "Connection reliability", last_contact_label: "Last contact with panel",
-      reliability_hint: "Watch this after lowering the power - if errors pile up here over the next few minutes/hours, or the last contact doesn't refresh, the power is too low.",
+      reliability_hint: "How many of the last checks on the panel succeeded, and how long ago the last one came through. Network settings (WiFi, panel IP, MQTT) are done on the 192.168.4.1 page, not here.",
       ago_prefix: "", ago_suffix: " ago",
-      network_title: "Network (WiFi + MQTT)",
-      network_hint: "Saving restarts the ESP32. Wrong home WiFi details will disconnect it from the internet, and you'll need to set it up again via 192.168.4.1.",
-      net_wifi_ssid: "Home WiFi - name (SSID)", net_wifi_pass: "Home WiFi - password",
-      net_mqtt_port: "MQTT port", net_mqtt_pass: "MQTT password",
-      net_save: "Save and restart ESP32",
-      net_confirm: "Really save? The ESP32 will restart and be briefly unavailable. Wrong WiFi details will disconnect it from the internet.",
       backup_download: "⭳ Download backup", backup_upload: "⭱ Restore backup",
       backup_confirm: "Restore this backup? It will replace all current schedules.",
       backup_error: "Couldn't read the file - not a valid schedule backup."
@@ -712,18 +637,10 @@
       guide_cloud_title: "Was das „Cloud“-Verbindungssymbol bedeutet",
       guide_cloud_p1: "Diese App spricht über den MQTT-Broker <b>HiveMQ Cloud</b> mit dem Whirlpool (ein kostenloser Dienst, nicht von Intex). Er ist nur ein „Briefkasten in der Mitte“ – der ESP32 sendet dort den Status hin, die App sendet dort Befehle hin; die eigentliche Logik (Zeitpläne, Timing) läuft weiterhin auf dem ESP32 zu Hause, nicht in der Cloud.",
       guide_cloud_p2: "Deshalb funktioniert die App zu Hause und unterwegs gleich und ist unabhängig von Intex und deren App.",
-      signal_router: "Router", signal_panel: "Panel",
-      txpower: "WiFi-Sendeleistung",
-      txpower_hint: "Ein gemeinsamer Regler für beide Verbindungen (der ESP32 hat nur ein Funkmodul). Auch bei 0% bleibt eine minimale funktionsfähige Leistung erhalten, es ist kein vollständiges Aus.",
+      signal_router: "Router",
       reliability_label: "Verbindungszuverlässigkeit", last_contact_label: "Letzter Kontakt mit dem Panel",
-      reliability_hint: "Beobachte das nach dem Absenken der Leistung - wenn hier in den nächsten Minuten/Stunden Fehler auftauchen oder sich der letzte Kontakt lange nicht aktualisiert, ist die Leistung zu niedrig.",
+      reliability_hint: "Wie viele der letzten Anfragen an das Panel erfolgreich waren und wie lange der letzte Kontakt her ist. Netzwerkeinstellungen (WiFi, Panel-IP, MQTT) werden auf der Seite 192.168.4.1 vorgenommen, nicht hier.",
       ago_prefix: "vor", ago_suffix: "",
-      network_title: "Netzwerk (WiFi + MQTT)",
-      network_hint: "Das Speichern startet den ESP32 neu. Falsche Heim-WLAN-Daten trennen ihn vom Internet, dann muss er erneut über 192.168.4.1 eingerichtet werden.",
-      net_wifi_ssid: "Heim-WLAN - Name (SSID)", net_wifi_pass: "Heim-WLAN - Passwort",
-      net_mqtt_port: "MQTT-Port", net_mqtt_pass: "MQTT-Passwort",
-      net_save: "Speichern und ESP32 neu starten",
-      net_confirm: "Wirklich speichern? Der ESP32 startet neu und ist kurz nicht erreichbar. Falsche WLAN-Daten trennen ihn vom Internet.",
       backup_download: "⭳ Sicherung herunterladen", backup_upload: "⭱ Sicherung hochladen",
       backup_confirm: "Diese Sicherung wiederherstellen? Ersetzt alle aktuellen Zeitpläne.",
       backup_error: "Datei konnte nicht gelesen werden - keine gültige Sicherung."
@@ -774,11 +691,7 @@
   const TOPIC_TIME = "intexspa/settings/time";
   const TOPIC_TIME_SET = "intexspa/settings/time/set";
   const TOPIC_SIGNAL = "intexspa/signal";
-  const TOPIC_TXPOWER = "intexspa/settings/txpower";
-  const TOPIC_TXPOWER_SET = "intexspa/settings/txpower/set";
   const TOPIC_RELIABILITY = "intexspa/reliability";
-  const TOPIC_NETWORK = "intexspa/settings/network";
-  const TOPIC_NETWORK_SET = "intexspa/settings/network/set";
 
   const STORAGE_KEY = "intexspa_mqtt_config";
   let client = null;
@@ -865,9 +778,7 @@
       client.subscribe(TOPIC_SCHED_LIST);
       client.subscribe(TOPIC_TIME);
       client.subscribe(TOPIC_SIGNAL);
-      client.subscribe(TOPIC_TXPOWER);
       client.subscribe(TOPIC_RELIABILITY);
-      client.subscribe(TOPIC_NETWORK);
       client.publish(TOPIC_SCHED_REQUEST, "1");
     });
     client.on("reconnect", () => setConnStatus("", "connecting"));
@@ -883,9 +794,7 @@
         else if (topic === TOPIC_SCHED_LIST) { schedules = JSON.parse(str); renderSchedules(); }
         else if (topic === TOPIC_TIME) { timeInfo = JSON.parse(str); renderTime(); }
         else if (topic === TOPIC_SIGNAL) { renderSignal(JSON.parse(str)); }
-        else if (topic === TOPIC_TXPOWER) { renderTxPower(JSON.parse(str)); }
         else if (topic === TOPIC_RELIABILITY) { renderReliability(JSON.parse(str)); }
-        else if (topic === TOPIC_NETWORK) { renderNetwork(JSON.parse(str)); }
       } catch (e) { console.error("Chyba zpracovani zpravy", topic, e); }
     });
   }
@@ -1136,9 +1045,7 @@
   }
   function renderSignal(sig) {
     const homePct = sig.home_percent || 0;
-    const panelPct = sig.panel_connected ? (sig.panel_percent || 0) : 0;
     setSignalBar("signalHomeFill", "signalHomePct", homePct, true);
-    setSignalBar("signalPanelFill", "signalPanelPct", panelPct, sig.panel_connected);
   }
 
   // ===================== Nastavení: spolehlivost / posledni spojeni =====================
@@ -1160,52 +1067,6 @@
     lastEl.textContent = (ago == null || ago < 0) ? "–" : (t("ago_prefix") + " " + fmtAgo(ago) + t("ago_suffix")).trim();
     lastEl.className = "reliability-value" + (ago != null && ago > 120 ? " warn" : "");
   }
-
-  // ===================== Nastavení: vysílací výkon =====================
-  let txPowerPending = null;
-  function renderTxPower(data) {
-    if (txPowerPending !== null) return;  // uzivatel prave posouva slider, neprepisuj mu to
-    const pct = data.percent != null ? data.percent : 100;
-    document.getElementById("txPowerSlider").value = pct;
-    document.getElementById("txPowerValue").textContent = pct + "%";
-  }
-  document.getElementById("txPowerSlider").addEventListener("input", (e) => {
-    txPowerPending = parseInt(e.target.value, 10);
-    document.getElementById("txPowerValue").textContent = txPowerPending + "%";
-  });
-  document.getElementById("txPowerSaveBtn").addEventListener("click", () => {
-    const val = txPowerPending !== null ? txPowerPending : parseInt(document.getElementById("txPowerSlider").value, 10);
-    publish(TOPIC_TXPOWER_SET, val);
-    txPowerPending = null;
-  });
-
-  // ===================== Nastavení: síť (WiFi + MQTT na ESP32) =====================
-  let networkFormTouched = false;
-  ["netWifiSsid", "netWifiPass", "netMqttHost", "netMqttPort", "netMqttUser", "netMqttPass"].forEach((id) => {
-    document.getElementById(id).addEventListener("input", () => { networkFormTouched = true; });
-  });
-  function renderNetwork(data) {
-    if (networkFormTouched) return;  // uzivatel uz zacal psat, neprepisuj mu to
-    document.getElementById("netWifiSsid").value = data.wifi_ssid || "";
-    document.getElementById("netWifiPass").value = data.wifi_pass || "";
-    document.getElementById("netMqttHost").value = data.mqtt_host || "";
-    document.getElementById("netMqttPort").value = data.mqtt_port || "";
-    document.getElementById("netMqttUser").value = data.mqtt_user || "";
-    document.getElementById("netMqttPass").value = data.mqtt_pass || "";
-  }
-  document.getElementById("netSaveBtn").addEventListener("click", () => {
-    const payload = {
-      wifi_ssid: document.getElementById("netWifiSsid").value.trim(),
-      wifi_pass: document.getElementById("netWifiPass").value,
-      mqtt_host: document.getElementById("netMqttHost").value.trim(),
-      mqtt_port: parseInt(document.getElementById("netMqttPort").value, 10) || 8883,
-      mqtt_user: document.getElementById("netMqttUser").value.trim(),
-      mqtt_pass: document.getElementById("netMqttPass").value
-    };
-    if (!confirm(t("net_confirm"))) return;
-    publish(TOPIC_NETWORK_SET, JSON.stringify(payload));
-    networkFormTouched = false;
-  });
 
   // ===================== Nastavení: čas / časové pásmo =====================
   function renderTime() {
