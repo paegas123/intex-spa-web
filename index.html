@@ -48,6 +48,9 @@
   }
   .conn-dot.ok { background: var(--accent); }
   .conn-dot.warm { background: var(--warm); }
+  .conn-dot.blue { background: #4d9fff; }
+  .conn-dot.blink { animation: dotBlink 1s infinite; }
+  @keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
   .conn-label { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
   .gear { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 2px 4px; line-height: 1; }
   .gear:hover { color: var(--text); }
@@ -130,6 +133,22 @@
     justify-content: center; background: var(--bg-panel-raised); color: var(--text-muted); border: 1px solid var(--border);
   }
   .day-dot.active { background: var(--accent); color: #04222b; border-color: var(--accent); font-weight: 700; }
+
+  /* ---------- Errors tab ---------- */
+  .error-list { display: flex; flex-direction: column; gap: 10px; }
+  .error-card {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .error-card .conn-dot { margin-top: 5px; flex-shrink: 0; }
+  .error-main { display: flex; flex-direction: column; gap: 3px; }
+  .error-type { font-size: 14px; font-weight: 600; }
+  .error-time { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text-muted); }
+  .diag-result { background: var(--bg-panel-raised); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; margin-top: 12px; font-size: 13px; line-height: 1.5; }
+  .diag-line { margin-bottom: 8px; }
+  .diag-line:last-child { margin-bottom: 0; }
+  .diag-signal { color: var(--text-muted); font-family: 'Share Tech Mono', monospace; font-size: 12px; }
   .sched-actions { display: flex; gap: 6px; align-items: center; }
   .icon-btn {
     background: var(--bg-panel-raised); border: 1px solid var(--border); border-radius: 9px; width: 32px; height: 32px;
@@ -240,6 +259,9 @@
         <button data-lang="de">DE</button>
       </div>
       <span class="conn-label"><span class="conn-dot" id="connDot"></span><span id="connLabel">…</span></span>
+      <span class="conn-label errors-summary" id="errorsSummaryLabel" style="cursor:pointer;">
+        <span class="conn-dot blue" id="errorsDot"></span><span data-i18n="tab_errors">Chyby</span>
+      </span>
       <button class="gear" id="gearBtn" title="Nastavení připojení">⚙</button>
     </div>
   </header>
@@ -247,6 +269,7 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="control" data-i18n="tab_control">Ovládání</button>
     <button class="tab-btn" data-tab="schedule" data-i18n="tab_schedule">Plány</button>
+    <button class="tab-btn" data-tab="errors" data-i18n="tab_errors">Chyby</button>
     <button class="tab-btn" data-tab="settings" data-i18n="tab_settings">Nastavení</button>
     <button class="tab-btn" data-tab="guide" data-i18n="tab_guide">Návod</button>
   </div>
@@ -317,6 +340,21 @@
       <button class="btn btn-secondary" id="schedDownloadBtn" data-i18n="backup_download">⭳ Stáhnout zálohu</button>
       <button class="btn btn-secondary" id="schedUploadBtn" data-i18n="backup_upload">⭱ Nahrát zálohu</button>
       <input type="file" id="schedUploadInput" accept="application/json" style="display:none;">
+    </div>
+  </div>
+
+  <!-- ============== TAB: Chyby ============== -->
+  <div class="tab-panel" id="tab-errors">
+    <p class="hint" data-i18n="errors_hint">Posledních 10 zaznamenaných chyb. Červená blikající tečka = chyba právě trvá, modrá tečka = už odezněla.</p>
+    <div class="error-list" id="errorList"></div>
+    <p class="hint" id="errorsEmptyHint" data-i18n="errors_none" style="display:none;">Zatím žádné chyby.</p>
+
+    <div class="settings-card">
+      <h3 data-i18n="diag_title">Autodiagnostika a oprava</h3>
+      <button class="btn btn-primary" id="diagRunBtn" style="width:100%;" data-i18n="diag_run">Spustit autodiagnostiku</button>
+      <div id="diagResult" style="display:none;"></div>
+      <button class="btn btn-secondary" id="diagRetryBtn" style="width:100%;margin-top:10px;" data-i18n="diag_retry">Zkusit hned znovu (panel)</button>
+      <button class="btn btn-secondary" id="diagRestartBtn" style="width:100%;margin-top:10px;color:var(--danger);" data-i18n="diag_restart">Restartovat ESP32</button>
     </div>
   </div>
 
@@ -495,8 +533,26 @@
       err_host: "Vyplň adresu brokeru.", err_user: "Vyplň uživatelské jméno.",
       err_days: "Vyber aspoň jeden den.", err_mqtt_lib: "Knihovna MQTT se nenačetla (chybí internet nebo ji blokuje prohlížeč).",
       err_same_time: "Čas spuštění a ukončení se nesmí shodovat.",
-      connecting: "Připojuji…", connected: "Připojeno", disconnected: "Odpojeno", bridge_offline: "Bridge offline",
+      connecting: "Připojuji…", connected: "Připojeno", disconnected: "Odpojeno", bridge_offline: "Bridge nedostupný",
+      panel_unreachable: "Panel nedostupný",
       conn_error: "Chyba připojení", not_set: "Nenastaveno",
+      tab_errors: "Chyby",
+      errors_hint: "Posledních 10 zaznamenaných chyb. Červená blikající tečka = chyba právě trvá, modrá tečka = už odezněla.",
+      errors_none: "Zatím žádné chyby.",
+      errlog_panel_unreachable: "Panel nedostupný", errlog_wifi_disconnected: "Výpadek domácí WiFi", errlog_mqtt_disconnected: "Výpadek MQTT spojení",
+      errlog_started: "Od", errlog_ended: "Do",
+      diag_title: "Autodiagnostika a oprava",
+      diag_run: "Spustit autodiagnostiku",
+      diag_retry: "Zkusit hned znovu (panel)",
+      diag_restart: "Restartovat ESP32",
+      diag_restart_confirm: "Opravdu restartovat ESP32? Na chvíli (cca 10-20s) vypadne veškeré spojení.",
+      diag_retry_sent: "Odesláno - ESP32 se hned pokusí spojit s panelem.",
+      diag_restart_sent: "Odesláno - ESP32 se za chvíli restartuje.",
+      diag_no_errors: "Aktuálně nebyla zjištěna žádná trvající chyba. Systém funguje v pořádku.",
+      diag_signal_line: "Síla WiFi signálu: ",
+      diag_suggestion_panel_unreachable: "Panel vířivky neodpovídá na nastavené IP adrese. Zkontroluj: 1) je vířivka zapnutá a připojená k WiFi (kontrolka na panelu svítí), 2) souhlasí IP adresa v nastavení (192.168.4.1) s aktuální IP panelu na routeru, 3) DHCP rezervace na routeru je stále platná. Zkus tlačítko „Zkusit hned znovu“ níže, případně restartuj ESP32.",
+      diag_suggestion_wifi_disconnected: "ESP32 ztratilo spojení s domácí WiFi sítí. Zkontroluj: 1) router/mesh uzel je zapnutý a funguje, 2) heslo k WiFi se nezměnilo, 3) ESP32 je v dosahu signálu. ESP32 se samo pokouší znovu připojit každých pár vteřin - pokud to trvá dlouho, zkus restartovat ESP32.",
+      diag_suggestion_mqtt_disconnected: "ESP32 je připojené k WiFi, ale nedaří se mu spojit s MQTT brokerem (HiveMQ). Zkontroluj: 1) je HiveMQ cluster aktivní (bezplatné clustery mohou po dlouhé neaktivitě zaniknout), 2) přístupové údaje v nastavení (192.168.4.1) jsou správné, 3) internetové připojení funguje. Zkus restartovat ESP32.",
       tab_guide: "Návod",
       guide_intro: "Kompletní postup od nuly, jednorázově. Až bude hotovo, běžné používání je jen otevření této stránky.",
       guide_step1_title: "1. Spárování panelu s ESP32 (jen jednou)",
@@ -552,7 +608,25 @@
       err_days: "Pick at least one day.", err_mqtt_lib: "MQTT library failed to load (no internet or blocked by browser).",
       err_same_time: "Start and end time can't be the same.",
       connecting: "Connecting…", connected: "Connected", disconnected: "Disconnected", bridge_offline: "Bridge offline",
+      panel_unreachable: "Panel unreachable",
       conn_error: "Connection error", not_set: "Not set up",
+      tab_errors: "Errors",
+      errors_hint: "The last 10 recorded errors. Blinking red dot = still ongoing, blue dot = already resolved.",
+      errors_none: "No errors yet.",
+      errlog_panel_unreachable: "Panel unreachable", errlog_wifi_disconnected: "Home WiFi outage", errlog_mqtt_disconnected: "MQTT connection lost",
+      errlog_started: "From", errlog_ended: "To",
+      diag_title: "Auto-diagnosis & fix",
+      diag_run: "Run auto-diagnosis",
+      diag_retry: "Retry now (panel)",
+      diag_restart: "Restart ESP32",
+      diag_restart_confirm: "Really restart the ESP32? Everything will briefly (~10-20s) go offline.",
+      diag_retry_sent: "Sent - the ESP32 will try reaching the panel right away.",
+      diag_restart_sent: "Sent - the ESP32 will restart shortly.",
+      diag_no_errors: "No ongoing error detected right now. Everything looks fine.",
+      diag_signal_line: "WiFi signal strength: ",
+      diag_suggestion_panel_unreachable: "The spa panel isn't responding at the configured IP address. Check: 1) the spa is powered on and connected to WiFi (the panel's light should be on), 2) the IP address in settings (192.168.4.1) matches the panel's current IP on the router, 3) the router's DHCP reservation is still valid. Try the 'Retry now' button below, or restart the ESP32.",
+      diag_suggestion_wifi_disconnected: "The ESP32 lost its home WiFi connection. Check: 1) the router/mesh node is powered on and working, 2) the WiFi password hasn't changed, 3) the ESP32 is within signal range. The ESP32 keeps retrying automatically every few seconds - if it's taking a while, try restarting the ESP32.",
+      diag_suggestion_mqtt_disconnected: "The ESP32 is on WiFi but can't reach the MQTT broker (HiveMQ). Check: 1) the HiveMQ cluster is still active (free clusters can be paused after long inactivity), 2) the credentials in settings (192.168.4.1) are correct, 3) the internet connection is working. Try restarting the ESP32.",
       tab_guide: "Guide",
       guide_intro: "Full setup from scratch, one time only. Once done, everyday use is just opening this page.",
       guide_step1_title: "1. Pairing the panel with the ESP32 (one time only)",
@@ -608,7 +682,25 @@
       err_days: "Mindestens einen Tag wählen.", err_mqtt_lib: "MQTT-Bibliothek konnte nicht geladen werden (kein Internet oder vom Browser blockiert).",
       err_same_time: "Start- und Endzeit dürfen nicht gleich sein.",
       connecting: "Verbinde…", connected: "Verbunden", disconnected: "Getrennt", bridge_offline: "Bridge offline",
+      panel_unreachable: "Panel nicht erreichbar",
       conn_error: "Verbindungsfehler", not_set: "Nicht eingerichtet",
+      tab_errors: "Fehler",
+      errors_hint: "Die letzten 10 protokollierten Fehler. Rot blinkend = besteht noch, blau = bereits behoben.",
+      errors_none: "Noch keine Fehler.",
+      errlog_panel_unreachable: "Panel nicht erreichbar", errlog_wifi_disconnected: "Heim-WLAN-Ausfall", errlog_mqtt_disconnected: "MQTT-Verbindung verloren",
+      errlog_started: "Von", errlog_ended: "Bis",
+      diag_title: "Autodiagnose & Reparatur",
+      diag_run: "Autodiagnose starten",
+      diag_retry: "Jetzt erneut versuchen (Panel)",
+      diag_restart: "ESP32 neu starten",
+      diag_restart_confirm: "ESP32 wirklich neu starten? Alles ist kurz (~10-20s) offline.",
+      diag_retry_sent: "Gesendet - der ESP32 versucht sofort, das Panel zu erreichen.",
+      diag_restart_sent: "Gesendet - der ESP32 startet in Kürze neu.",
+      diag_no_errors: "Aktuell wurde kein andauernder Fehler festgestellt. Alles funktioniert.",
+      diag_signal_line: "WLAN-Signalstärke: ",
+      diag_suggestion_panel_unreachable: "Das Whirlpool-Panel antwortet nicht auf der eingestellten IP-Adresse. Prüfe: 1) der Whirlpool ist eingeschaltet und mit WLAN verbunden (die Panel-LED sollte leuchten), 2) die IP-Adresse in den Einstellungen (192.168.4.1) stimmt mit der aktuellen IP des Panels im Router überein, 3) die DHCP-Reservierung im Router ist noch gültig. Versuche unten „Jetzt erneut versuchen“ oder starte den ESP32 neu.",
+      diag_suggestion_wifi_disconnected: "Der ESP32 hat die Verbindung zum Heim-WLAN verloren. Prüfe: 1) Router/Mesh-Knoten ist eingeschaltet und funktioniert, 2) das WLAN-Passwort hat sich nicht geändert, 3) der ESP32 ist in Reichweite. Der ESP32 versucht automatisch alle paar Sekunden erneut zu verbinden - dauert es lange, starte den ESP32 neu.",
+      diag_suggestion_mqtt_disconnected: "Der ESP32 ist im WLAN, erreicht aber den MQTT-Broker (HiveMQ) nicht. Prüfe: 1) der HiveMQ-Cluster ist noch aktiv (kostenlose Cluster können nach langer Inaktivität pausiert werden), 2) die Zugangsdaten in den Einstellungen (192.168.4.1) sind korrekt, 3) die Internetverbindung funktioniert. Starte den ESP32 neu.",
       tab_guide: "Anleitung",
       guide_intro: "Komplette Einrichtung von Grund auf, nur einmal nötig. Danach reicht im Alltag das Öffnen dieser Seite.",
       guide_step1_title: "1. Panel mit dem ESP32 koppeln (nur einmal)",
@@ -692,6 +784,7 @@
   const TOPIC_TIME_SET = "intexspa/settings/time/set";
   const TOPIC_SIGNAL = "intexspa/signal";
   const TOPIC_RELIABILITY = "intexspa/reliability";
+  const TOPIC_ERRORS = "intexspa/errors";
 
   const STORAGE_KEY = "intexspa_mqtt_config";
   let client = null;
@@ -751,16 +844,67 @@
   });
 
   // ===================== Connection status =====================
-  function setConnStatus(mode, textKey) {
+  // Tri urovne, ktere je potreba rozlisit:
+  //  1) brokerState   - spojeni prohlizece s MQTT brokerem (HiveMQ)
+  //  2) bridgeAvailable - je ESP32 samo pripojene k brokeru (LWT topic)
+  //  3) panel reachability - komunikuje ESP32 skutecne s panelem virivky
+  // "Pripojeno" (zelena) se ukaze jen kdyz jsou v poradku vsechny tri -
+  // jinak by dashboard matoucne tvrdil "Pripojeno", i kdyz je vyrivka
+  // fyzicky bez proudu a ESP32 s ni uz dlouho nemluvi.
+  let brokerState = "connecting";  // "connecting" | "connected" | "disconnected" | "error" | "err_mqtt_lib"
+  let bridgeAvailable = null;      // null = jeste nevime, true/false
+  let reliabilityData = null;
+  let reliabilityReceivedAt = 0;
+  const PANEL_STALE_SEC = 45;  // o neco vic nez 2x POLL_INTERVAL_MS na ESP32 (20s), kvuli rezerve
+
+  function isPanelFresh() {
+    if (!reliabilityData) return false;
+    const secAgo = reliabilityData.last_contact_sec_ago;
+    if (secAgo == null || secAgo < 0) return false;
+    const elapsedSinceMsg = (Date.now() - reliabilityReceivedAt) / 1000;
+    return (secAgo + elapsedSinceMsg) <= PANEL_STALE_SEC;
+  }
+
+  function applyConnDot(mode, textKey) {
     connDot.className = "conn-dot" + (mode === "ok" ? " ok" : mode === "warm" ? " warm" : "");
     connLabel.textContent = t(textKey);
+  }
+
+  function recomputeConnDisplay() {
+    if (brokerState !== "connected") {
+      const map = { connecting: "connecting", disconnected: "disconnected", error: "conn_error", err_mqtt_lib: "err_mqtt_lib" };
+      applyConnDot("", map[brokerState] || "connecting");
+      return;
+    }
+    if (bridgeAvailable !== true) {
+      applyConnDot("warm", "bridge_offline");
+      return;
+    }
+    if (!isPanelFresh()) {
+      applyConnDot("warm", "panel_unreachable");
+      return;
+    }
+    applyConnDot("ok", "connected");
+  }
+
+  // Prubezna kontrola i bez prichozich zprav - kdyby ESP32 prestalo
+  // odesilat spolehlivost (napr. zamrzly dotazy na panel), stav ma
+  // postupne zestarat i bez nove zpravy.
+  setInterval(recomputeConnDisplay, 5000);
+
+  function setConnStatus(mode, textKey) {
+    // Zpetna kompatibilita pro mista, ktera jeste volaji primo (napr.
+    // "not_set" pri chybejici konfiguraci) - obchazi tri-urovnovou logiku.
+    applyConnDot(mode, textKey);
   }
 
   // ===================== MQTT =====================
   function connect(cfg) {
     if (client) { try { client.end(true); } catch (e) {} }
-    setConnStatus("", "connecting");
-    if (typeof mqtt === "undefined") { setConnStatus("", "err_mqtt_lib"); return; }
+    brokerState = "connecting";
+    bridgeAvailable = null;
+    recomputeConnDisplay();
+    if (typeof mqtt === "undefined") { brokerState = "err_mqtt_lib"; recomputeConnDisplay(); return; }
 
     const url = "wss://" + cfg.host + ":" + cfg.port + "/mqtt";
     try {
@@ -769,32 +913,40 @@
         clientId: "intexspa-web-" + Math.random().toString(16).slice(2, 10),
         reconnectPeriod: 4000, connectTimeout: 8000
       });
-    } catch (e) { console.error(e); setConnStatus("", "conn_error"); return; }
+    } catch (e) { console.error(e); brokerState = "error"; recomputeConnDisplay(); return; }
 
     client.on("connect", () => {
-      setConnStatus("ok", "connected");
+      brokerState = "connected";
+      recomputeConnDisplay();
       client.subscribe(TOPIC_STATUS);
       client.subscribe(TOPIC_AVAIL);
       client.subscribe(TOPIC_SCHED_LIST);
       client.subscribe(TOPIC_TIME);
       client.subscribe(TOPIC_SIGNAL);
       client.subscribe(TOPIC_RELIABILITY);
+      client.subscribe(TOPIC_ERRORS);
       client.publish(TOPIC_SCHED_REQUEST, "1");
     });
-    client.on("reconnect", () => setConnStatus("", "connecting"));
-    client.on("close", () => setConnStatus("", "disconnected"));
-    client.on("offline", () => setConnStatus("", "disconnected"));
-    client.on("error", (err) => { console.error("MQTT chyba:", err); setConnStatus("", "conn_error"); });
+    client.on("reconnect", () => { brokerState = "connecting"; bridgeAvailable = null; recomputeConnDisplay(); });
+    client.on("close", () => { brokerState = "disconnected"; bridgeAvailable = null; recomputeConnDisplay(); });
+    client.on("offline", () => { brokerState = "disconnected"; bridgeAvailable = null; recomputeConnDisplay(); });
+    client.on("error", (err) => { console.error("MQTT chyba:", err); brokerState = "error"; recomputeConnDisplay(); });
 
     client.on("message", (topic, payload) => {
       const str = payload.toString();
       try {
         if (topic === TOPIC_STATUS) onStatus(JSON.parse(str));
-        else if (topic === TOPIC_AVAIL) setConnStatus(str === "online" ? "ok" : "warm", str === "online" ? "connected" : "bridge_offline");
+        else if (topic === TOPIC_AVAIL) { bridgeAvailable = (str === "online"); recomputeConnDisplay(); }
         else if (topic === TOPIC_SCHED_LIST) { schedules = JSON.parse(str); renderSchedules(); }
         else if (topic === TOPIC_TIME) { timeInfo = JSON.parse(str); renderTime(); }
         else if (topic === TOPIC_SIGNAL) { renderSignal(JSON.parse(str)); }
-        else if (topic === TOPIC_RELIABILITY) { renderReliability(JSON.parse(str)); }
+        else if (topic === TOPIC_RELIABILITY) {
+          reliabilityData = JSON.parse(str);
+          reliabilityReceivedAt = Date.now();
+          renderReliability(reliabilityData);
+          recomputeConnDisplay();
+        }
+        else if (topic === TOPIC_ERRORS) { renderErrors(JSON.parse(str)); }
       } catch (e) { console.error("Chyba zpracovani zpravy", topic, e); }
     });
   }
@@ -1043,7 +1195,9 @@
     fillEl.style.background = signalColor(pct);
     pctEl.textContent = pct + "%";
   }
+  let lastSignalData = null;
   function renderSignal(sig) {
+    lastSignalData = sig;
     const homePct = sig.home_percent || 0;
     setSignalBar("signalHomeFill", "signalHomePct", homePct, true);
   }
@@ -1067,6 +1221,104 @@
     lastEl.textContent = (ago == null || ago < 0) ? "–" : (t("ago_prefix") + " " + fmtAgo(ago) + t("ago_suffix")).trim();
     lastEl.className = "reliability-value" + (ago != null && ago > 120 ? " warn" : "");
   }
+
+  // ===================== Chyby =====================
+  const ERROR_TYPE_KEYS = {
+    panel_unreachable: "errlog_panel_unreachable",
+    wifi_disconnected: "errlog_wifi_disconnected",
+    mqtt_disconnected: "errlog_mqtt_disconnected"
+  };
+
+  function fmtErrorTime(epochSec) {
+    if (!epochSec || epochSec < 1700000000) return "?";  // 0 nebo cas pred synchronizaci (nedava smysl)
+    const d = new Date(epochSec * 1000);
+    const pad = (n) => String(n).padStart(2, "0");
+    return pad(d.getDate()) + "." + pad(d.getMonth() + 1) + ". " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function renderErrors(list) {
+    currentErrorsList = list || [];
+    const wrap = document.getElementById("errorList");
+    const emptyHint = document.getElementById("errorsEmptyHint");
+    wrap.innerHTML = "";
+
+    if (!list || list.length === 0) {
+      emptyHint.style.display = "block";
+    } else {
+      emptyHint.style.display = "none";
+      list.forEach((e) => {
+        const card = document.createElement("div");
+        card.className = "error-card";
+        const dotClass = e.ongoing ? "conn-dot blink" : "conn-dot blue";
+        const typeLabel = t(ERROR_TYPE_KEYS[e.type] || e.type);
+        const startStr = fmtErrorTime(e.start);
+        const endStr = e.ongoing ? "" : ("&nbsp;&nbsp;" + t("errlog_ended") + ": " + fmtErrorTime(e.end));
+        card.innerHTML =
+          "<span class='" + dotClass + "'></span>" +
+          "<div class='error-main'>" +
+          "<span class='error-type'>" + typeLabel + "</span>" +
+          "<span class='error-time'>" + t("errlog_started") + ": " + startStr + endStr + "</span>" +
+          "</div>";
+        wrap.appendChild(card);
+      });
+    }
+
+    const anyOngoing = !!(list && list.some((e) => e.ongoing));
+    const errDot = document.getElementById("errorsDot");
+    errDot.className = anyOngoing ? "conn-dot blink" : "conn-dot blue";
+  }
+
+  // ===================== Autodiagnostika a oprava =====================
+  const TOPIC_DIAG_RETRY = "intexspa/diag/retry";
+  const TOPIC_DIAG_RESTART = "intexspa/diag/restart";
+  let currentErrorsList = [];
+
+  function showDiagResult(html) {
+    const box = document.getElementById("diagResult");
+    box.className = "diag-result";
+    box.style.display = "block";
+    box.innerHTML = html;
+  }
+
+  function runDiagnostics() {
+    const ongoing = currentErrorsList.filter((e) => e.ongoing);
+    let html = "";
+
+    if (ongoing.length === 0) {
+      html += "<div class='diag-line'>" + t("diag_no_errors") + "</div>";
+    } else {
+      ongoing.forEach((e) => {
+        const key = "diag_suggestion_" + e.type;
+        html += "<div class='diag-line'>" + t(key) + "</div>";
+      });
+    }
+
+    if (lastSignalData && lastSignalData.home_dbm != null) {
+      html += "<div class='diag-line diag-signal'>" + t("diag_signal_line") +
+              lastSignalData.home_dbm + " dBm (" + (lastSignalData.home_percent || 0) + "%)</div>";
+    }
+
+    showDiagResult(html);
+  }
+
+  function retryPanelNow() {
+    publish(TOPIC_DIAG_RETRY, "1");
+    showDiagResult("<div class='diag-line'>" + t("diag_retry_sent") + "</div>");
+  }
+
+  function restartEspNow() {
+    if (!confirm(t("diag_restart_confirm"))) return;
+    publish(TOPIC_DIAG_RESTART, "1");
+    showDiagResult("<div class='diag-line'>" + t("diag_restart_sent") + "</div>");
+  }
+
+  document.getElementById("diagRunBtn").addEventListener("click", runDiagnostics);
+  document.getElementById("diagRetryBtn").addEventListener("click", retryPanelNow);
+  document.getElementById("diagRestartBtn").addEventListener("click", restartEspNow);
+
+  document.getElementById("errorsSummaryLabel").addEventListener("click", () => {
+    document.querySelector(".tab-btn[data-tab='errors']").click();
+  });
 
   // ===================== Nastavení: čas / časové pásmo =====================
   function renderTime() {
