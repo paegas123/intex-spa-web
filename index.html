@@ -698,6 +698,7 @@
       notify_title: "Notifikace při výpadku",
       notify_hint: "Pošle push notifikaci na telefon (přes ntfy.sh), pokud je panel vířivky nedostupný déle než 15 minut, pak znovu po 60 minutách a dál každou hodinu, dokud se to nevyřeší. Téma ntfy.sh se nastavuje jednorázově na stránce 192.168.4.1.",
       notify_on: "Zapnuto", notify_off: "Vypnuto",
+      notify_confirm_on: "Notifikace zapnuty", notify_confirm_off: "Notifikace vypnuty",
       ago_prefix: "před", ago_suffix: "",
       backup_download: "⭳ Stáhnout zálohu", backup_upload: "⭱ Nahrát zálohu",
       backup_confirm: "Nahrát tuhle zálohu? Přepíše všechny aktuální plány.",
@@ -827,6 +828,7 @@
       notify_title: "Outage notifications",
       notify_hint: "Sends a push notification to your phone (via ntfy.sh) if the spa panel is unreachable for more than 15 minutes, then again after 60 minutes, and every hour after that until it's resolved. The ntfy.sh topic is set once on the 192.168.4.1 page.",
       notify_on: "On", notify_off: "Off",
+      notify_confirm_on: "Notifications turned on", notify_confirm_off: "Notifications turned off",
       ago_prefix: "", ago_suffix: " ago",
       backup_download: "⭳ Download backup", backup_upload: "⭱ Restore backup",
       backup_confirm: "Restore this backup? It will replace all current schedules.",
@@ -956,6 +958,7 @@
       notify_title: "Benachrichtigungen bei Ausfall",
       notify_hint: "Sendet eine Push-Benachrichtigung an dein Handy (über ntfy.sh), wenn das Whirlpool-Panel länger als 15 Minuten nicht erreichbar ist, dann erneut nach 60 Minuten und danach jede weitere Stunde, bis das Problem behoben ist. Das ntfy.sh-Thema wird einmalig auf der Seite 192.168.4.1 eingestellt.",
       notify_on: "Ein", notify_off: "Aus",
+      notify_confirm_on: "Benachrichtigungen eingeschaltet", notify_confirm_off: "Benachrichtigungen ausgeschaltet",
       ago_prefix: "vor", ago_suffix: "",
       backup_download: "⭳ Sicherung herunterladen", backup_upload: "⭱ Sicherung hochladen",
       backup_confirm: "Diese Sicherung wiederherstellen? Ersetzt alle aktuellen Zeitpläne.",
@@ -1589,8 +1592,10 @@
     document.getElementById("notifyOnBtn").classList.toggle("active", enabled);
     document.getElementById("notifyOffBtn").classList.toggle("active", !enabled);
   }
-  document.getElementById("notifyOnBtn").addEventListener("click", () => publish(TOPIC_NOTIFY_SET, "1"));
-  document.getElementById("notifyOffBtn").addEventListener("click", () => publish(TOPIC_NOTIFY_SET, "0"));
+  document.getElementById("notifyOnBtn").addEventListener("click", () =>
+    publish(TOPIC_NOTIFY_SET, JSON.stringify({ enabled: true, confirm_text: t("notify_confirm_on") })));
+  document.getElementById("notifyOffBtn").addEventListener("click", () =>
+    publish(TOPIC_NOTIFY_SET, JSON.stringify({ enabled: false, confirm_text: t("notify_confirm_off") })));
 
   // ===================== Boot =====================
   applyI18n();
