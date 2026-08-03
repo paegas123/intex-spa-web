@@ -474,29 +474,31 @@
 
     <div class="settings-card">
       <h3 data-i18n="guide_s5_title">5. Otevření webového dashboardu</h3>
-      <p class="guide-subhead" data-i18n="guide_s5_1_head">5.1 Otevření stránky</p>
-      <p class="hint" data-i18n="guide_s5_1_body">Otevři soubor web/index.html v prohlížeči (dvojklikem, nebo přes GitHub Pages – viz 5.3).</p>
-      <p class="guide-subhead" data-i18n="guide_s5_2_head">5.2 Zadání MQTT údajů do dashboardu</p>
-      <p class="hint" data-i18n="guide_s5_2_body">Při prvním otevření (nebo kliknutím na ozubené kolečko ⚙ vpravo nahoře) zadej stejné MQTT údaje z Kroku 4.<br>Tyhle údaje se uloží přímo v prohlížeči (ne na ESP32) – na každém novém zařízení/prohlížeči je potřeba zadat znovu.<br>Ulož a dashboard by se měl připojit – v hlavičce uvidíš modré „Připojeno“.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_head">5.3 Hostování na GitHub Pages (doporučeno pro stálý přístup)</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_1_head">5.3.1 Založení GitHub účtu (pokud ho ještě nemáš)</p>
-      <p class="hint" data-i18n="guide_s5_3_1_body">Jdi na github.com a klikni „Sign up“.<br>Zadej email, heslo, uživatelské jméno – je to zdarma.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_2_head">5.3.2 Vytvoření nového repozitáře</p>
-      <p class="hint" data-i18n="guide_s5_3_2_body">Po přihlášení klikni vpravo nahoře na „+“ → „New repository“.<br>Zadej název (např. intex-spa-dashboard) – může být cokoliv.<br>Nastav ho jako Public (Pages ve free verzi funguje jen u veřejných repozitářů).<br>Nezaškrtávej žádné doplňkové soubory (README apod.) – nech prázdné.<br>Klikni „Create repository“.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_3_head">5.3.3 Nahrání souboru index.html</p>
-      <p class="hint" data-i18n="guide_s5_3_3_body">V nově vytvořeném (prázdném) repozitáři klikni na odkaz „uploading an existing file“ (nebo „Add file“ → „Upload files“).<br>Přetáhni tam svůj web/index.html (jen ten jeden soubor index.html).<br>Dole klikni „Commit changes“ (zelené tlačítko) – tím se soubor uloží.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_4_head">5.3.4 Zapnutí GitHub Pages</p>
-      <p class="hint" data-i18n="guide_s5_3_4_body">V repozitáři klikni nahoře na záložku „Settings“.<br>V levém menu najdi „Pages“.<br>U „Source“ vyber větev main a složku / (root).<br>Klikni „Save“.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_5_head">5.3.5 Získání stálé adresy</p>
-      <p class="hint" data-i18n="guide_s5_3_5_body">Počkej cca 1-2 minuty (GitHub potřebuje chvíli na zveřejnění).<br>Znovu otevři Settings → Pages – nahoře už by mělo být zelené hlášení s odkazem typu https://tvoje-jmeno.github.io/intex-spa-dashboard/.<br>Pokud jsi nahrál soubor přímo jako index.html (ne do podsložky), tahle adresa rovnou otevře dashboard.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_6_head">5.3.6 Uložení na plochu telefonu</p>
-      <p class="hint" data-i18n="guide_s5_3_6_body">Otevři tu adresu v mobilním prohlížeči (Safari na iPhonu, Chrome na Androidu).<br>iPhone (Safari): ikona sdílení (čtvereček se šipkou) → „Přidat na plochu“.<br>Android (Chrome): tři tečky vpravo nahoře → „Přidat na plochu“ / „Nainstalovat aplikaci“.<br>Na ploše se objeví ikonka, která po kliknutí otevře dashboard na celou obrazovku, bez adresního řádku – jako appka.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_3_7_head">5.3.7 Aktualizace v budoucnu</p>
-      <p class="hint" data-i18n="guide_s5_3_7_body">Kdykoliv se web/index.html aktualizuje, stačí v GitHub repozitáři starý soubor nahradit novým (Add file → Upload files, přepsat) – adresa zůstává stejná, není potřeba nic znovu instalovat.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_4_head">5.4 Notifikace při výpadku (volitelné)</p>
-      <p class="hint" data-i18n="guide_s5_4_body">Stáhni appku <b>ntfy</b> (App Store i Google Play) – oficiální appka pro tuhle zdarma službu.<br>V appce si zvol vlastní, těžko uhodnutelný název tématu (např. intexspa-tvoje-jmeno-8271) a přihlas se k němu (tlačítko „Subscribe to topic“).<br>Stejný název tématu zadej na konfigurační stránce ESP32 (192.168.4.1, pole „Téma ntfy.sh“) a ulož.<br>Zapnutí/vypnutí notifikací pak najdeš na hlavním webu v záložce Nastavení. Když je panel vířivky nedostupný déle než 15 minut, přijde notifikace, další po 60 minutách a pak každou hodinu, dokud se to nevyřeší.</p>
-      <p class="guide-subhead" data-i18n="guide_s5_5_head">5.5 Přehled záložek</p>
-      <p class="hint" data-i18n="guide_s5_5_body">Ovládání – zapnutí/vypnutí funkcí, teplota, aktuální stav.<br>Plány – časové plány filtrace/ohřevu/solinátoru, záloha/obnova.<br>Nastavení – čas/časové pásmo, spolehlivost spojení s panelem, notifikace při výpadku.<br>Chyby – posledních 10 zaznamenaných chyb + Autodiagnostika a oprava (textový návod, okamžitý pokus o spojení, restart ESP32 na dálku, vymazání historie).</p>
+      <p class="guide-subhead" data-i18n="guide_s5_1_head">5.1 Použij hotovou stránku (nejjednodušší cesta)</p>
+      <p class="hint" data-i18n="guide_s5_1_body">Tenhle projekt už má hotovou, veřejně dostupnou stránku, kterou může použít kdokoliv – není potřeba zakládat vlastní GitHub účet ani nic hostovat. Stačí otevřít <a href="https://paegas123.github.io/intex-spa-web/" target="_blank" style="color:var(--accent);">paegas123.github.io/intex-spa-web</a> a přes ozubené kolečko ⚙ zadat svoje vlastní MQTT údaje z Kroku 4 (adresa brokeru, port, uživatel, heslo). Stránka je univerzální a bezpečná ke sdílení – neobsahuje žádná citlivá data, každý uživatel má svoje přihlašovací údaje uložené jen ve vlastním prohlížeči, takže se navzájem nijak neovlivňujete. Krok 5.4 (vlastní hostování na GitHub Pages) je pak čistě volitelný, pro ty, kdo chtějí mít svou vlastní kopii.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_2_head">5.2 Otevření stránky</p>
+      <p class="hint" data-i18n="guide_s5_2_body">Otevři soubor web/index.html v prohlížeči (dvojklikem, nebo přes GitHub Pages – viz 5.3).</p>
+      <p class="guide-subhead" data-i18n="guide_s5_3_head">5.3 Zadání MQTT údajů do dashboardu</p>
+      <p class="hint" data-i18n="guide_s5_3_body">Při prvním otevření (nebo kliknutím na ozubené kolečko ⚙ vpravo nahoře) zadej stejné MQTT údaje z Kroku 4.<br>Tyhle údaje se uloží přímo v prohlížeči (ne na ESP32) – na každém novém zařízení/prohlížeči je potřeba zadat znovu.<br>Ulož a dashboard by se měl připojit – v hlavičce uvidíš modré „Připojeno“.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_head">5.4 Hostování na GitHub Pages (doporučeno pro stálý přístup)</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_1_head">5.4.1 Založení GitHub účtu (pokud ho ještě nemáš)</p>
+      <p class="hint" data-i18n="guide_s5_4_1_body">Jdi na github.com a klikni „Sign up“.<br>Zadej email, heslo, uživatelské jméno – je to zdarma.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_2_head">5.4.2 Vytvoření nového repozitáře</p>
+      <p class="hint" data-i18n="guide_s5_4_2_body">Po přihlášení klikni vpravo nahoře na „+“ → „New repository“.<br>Zadej název (např. intex-spa-dashboard) – může být cokoliv.<br>Nastav ho jako Public (Pages ve free verzi funguje jen u veřejných repozitářů).<br>Nezaškrtávej žádné doplňkové soubory (README apod.) – nech prázdné.<br>Klikni „Create repository“.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_3_head">5.4.3 Nahrání souboru index.html</p>
+      <p class="hint" data-i18n="guide_s5_4_3_body">V nově vytvořeném (prázdném) repozitáři klikni na odkaz „uploading an existing file“ (nebo „Add file“ → „Upload files“).<br>Přetáhni tam svůj web/index.html (jen ten jeden soubor index.html).<br>Dole klikni „Commit changes“ (zelené tlačítko) – tím se soubor uloží.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_4_head">5.4.4 Zapnutí GitHub Pages</p>
+      <p class="hint" data-i18n="guide_s5_4_4_body">V repozitáři klikni nahoře na záložku „Settings“.<br>V levém menu najdi „Pages“.<br>U „Source“ vyber větev main a složku / (root).<br>Klikni „Save“.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_5_head">5.4.5 Získání stálé adresy</p>
+      <p class="hint" data-i18n="guide_s5_4_5_body">Počkej cca 1-2 minuty (GitHub potřebuje chvíli na zveřejnění).<br>Znovu otevři Settings → Pages – nahoře už by mělo být zelené hlášení s odkazem typu https://tvoje-jmeno.github.io/intex-spa-dashboard/.<br>Pokud jsi nahrál soubor přímo jako index.html (ne do podsložky), tahle adresa rovnou otevře dashboard.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_6_head">5.4.6 Uložení na plochu telefonu</p>
+      <p class="hint" data-i18n="guide_s5_4_6_body">Otevři tu adresu v mobilním prohlížeči (Safari na iPhonu, Chrome na Androidu).<br>iPhone (Safari): ikona sdílení (čtvereček se šipkou) → „Přidat na plochu“.<br>Android (Chrome): tři tečky vpravo nahoře → „Přidat na plochu“ / „Nainstalovat aplikaci“.<br>Na ploše se objeví ikonka, která po kliknutí otevře dashboard na celou obrazovku, bez adresního řádku – jako appka.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_4_7_head">5.4.7 Aktualizace v budoucnu</p>
+      <p class="hint" data-i18n="guide_s5_4_7_body">Kdykoliv se web/index.html aktualizuje, stačí v GitHub repozitáři starý soubor nahradit novým (Add file → Upload files, přepsat) – adresa zůstává stejná, není potřeba nic znovu instalovat.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_5_head">5.5 Notifikace při výpadku (volitelné)</p>
+      <p class="hint" data-i18n="guide_s5_5_body">Stáhni appku <b>ntfy</b> (App Store i Google Play) – oficiální appka pro tuhle zdarma službu.<br>V appce si zvol vlastní, těžko uhodnutelný název tématu (např. intexspa-tvoje-jmeno-8271) a přihlas se k němu (tlačítko „Subscribe to topic“).<br>Stejný název tématu zadej na konfigurační stránce ESP32 (192.168.4.1, pole „Téma ntfy.sh“) a ulož.<br>Zapnutí/vypnutí notifikací pak najdeš na hlavním webu v záložce Nastavení. Když je panel vířivky nedostupný déle než 15 minut, přijde notifikace, další po 60 minutách a pak každou hodinu, dokud se to nevyřeší.</p>
+      <p class="guide-subhead" data-i18n="guide_s5_6_head">5.6 Přehled záložek</p>
+      <p class="hint" data-i18n="guide_s5_6_body">Ovládání – zapnutí/vypnutí funkcí, teplota, aktuální stav.<br>Plány – časové plány filtrace/ohřevu/solinátoru, záloha/obnova.<br>Nastavení – čas/časové pásmo, spolehlivost spojení s panelem, notifikace při výpadku.<br>Chyby – posledních 10 zaznamenaných chyb + Autodiagnostika a oprava (textový návod, okamžitý pokus o spojení, restart ESP32 na dálku, vymazání historie).</p>
     </div>
 
     <div class="settings-card">
@@ -666,29 +668,31 @@
       guide_s4_5_head: "4.5 Pokud si nejsi jistý, jestli cluster ještě funguje",
       guide_s4_5_body: "Bezplatné HiveMQ clustery mohou po delší době neaktivity zaniknout.<br>Ověření: pokud ESP32 v sériové konzoli píše „[MQTT] Pripojuji se k brokeru... selhalo“, zkontroluj na console.hivemq.cloud, jestli cluster ještě existuje.",
       guide_s5_title: "5. Otevření webového dashboardu",
-      guide_s5_1_head: "5.1 Otevření stránky",
-      guide_s5_1_body: "Otevři soubor web/index.html v prohlížeči (dvojklikem, nebo přes GitHub Pages – viz 5.3).",
-      guide_s5_2_head: "5.2 Zadání MQTT údajů do dashboardu",
-      guide_s5_2_body: "Při prvním otevření (nebo kliknutím na ozubené kolečko ⚙ vpravo nahoře) zadej stejné MQTT údaje z Kroku 4.<br>Tyhle údaje se uloží přímo v prohlížeči (ne na ESP32) – na každém novém zařízení/prohlížeči je potřeba zadat znovu.<br>Ulož a dashboard by se měl připojit – v hlavičce uvidíš modré „Připojeno“.",
-      guide_s5_3_head: "5.3 Hostování na GitHub Pages (doporučeno pro stálý přístup)",
-      guide_s5_3_1_head: "5.3.1 Založení GitHub účtu (pokud ho ještě nemáš)",
-      guide_s5_3_1_body: "Jdi na github.com a klikni „Sign up“.<br>Zadej email, heslo, uživatelské jméno – je to zdarma.",
-      guide_s5_3_2_head: "5.3.2 Vytvoření nového repozitáře",
-      guide_s5_3_2_body: "Po přihlášení klikni vpravo nahoře na „+“ → „New repository“.<br>Zadej název (např. intex-spa-dashboard) – může být cokoliv.<br>Nastav ho jako Public (Pages ve free verzi funguje jen u veřejných repozitářů).<br>Nezaškrtávej žádné doplňkové soubory (README apod.) – nech prázdné.<br>Klikni „Create repository“.",
-      guide_s5_3_3_head: "5.3.3 Nahrání souboru index.html",
-      guide_s5_3_3_body: "V nově vytvořeném (prázdném) repozitáři klikni na odkaz „uploading an existing file“ (nebo „Add file“ → „Upload files“).<br>Přetáhni tam svůj web/index.html (jen ten jeden soubor index.html).<br>Dole klikni „Commit changes“ (zelené tlačítko) – tím se soubor uloží.",
-      guide_s5_3_4_head: "5.3.4 Zapnutí GitHub Pages",
-      guide_s5_3_4_body: "V repozitáři klikni nahoře na záložku „Settings“.<br>V levém menu najdi „Pages“.<br>U „Source“ vyber větev main a složku / (root).<br>Klikni „Save“.",
-      guide_s5_3_5_head: "5.3.5 Získání stálé adresy",
-      guide_s5_3_5_body: "Počkej cca 1-2 minuty (GitHub potřebuje chvíli na zveřejnění).<br>Znovu otevři Settings → Pages – nahoře už by mělo být zelené hlášení s odkazem typu https://tvoje-jmeno.github.io/intex-spa-dashboard/.<br>Pokud jsi nahrál soubor přímo jako index.html (ne do podsložky), tahle adresa rovnou otevře dashboard.",
-      guide_s5_3_6_head: "5.3.6 Uložení na plochu telefonu",
-      guide_s5_3_6_body: "Otevři tu adresu v mobilním prohlížeči (Safari na iPhonu, Chrome na Androidu).<br>iPhone (Safari): ikona sdílení (čtvereček se šipkou) → „Přidat na plochu“.<br>Android (Chrome): tři tečky vpravo nahoře → „Přidat na plochu“ / „Nainstalovat aplikaci“.<br>Na ploše se objeví ikonka, která po kliknutí otevře dashboard na celou obrazovku, bez adresního řádku – jako appka.",
-      guide_s5_3_7_head: "5.3.7 Aktualizace v budoucnu",
-      guide_s5_3_7_body: "Kdykoliv se web/index.html aktualizuje, stačí v GitHub repozitáři starý soubor nahradit novým (Add file → Upload files, přepsat) – adresa zůstává stejná, není potřeba nic znovu instalovat.",
-      guide_s5_4_head: "5.4 Notifikace při výpadku (volitelné)",
-      guide_s5_4_body: "Stáhni appku ntfy (App Store i Google Play) – oficiální appka pro tuhle zdarma službu.<br>V appce si zvol vlastní, těžko uhodnutelný název tématu (např. intexspa-tvoje-jmeno-8271) a přihlas se k němu (tlačítko „Subscribe to topic“).<br>Stejný název tématu zadej na konfigurační stránce ESP32 (192.168.4.1, pole „Téma ntfy.sh“) a ulož.<br>Zapnutí/vypnutí notifikací pak najdeš na hlavním webu v záložce Nastavení. Když je panel vířivky nedostupný déle než 15 minut, přijde notifikace, další po 60 minutách a pak každou hodinu, dokud se to nevyřeší.",
-      guide_s5_5_head: "5.5 Přehled záložek",
-      guide_s5_5_body: "Ovládání – zapnutí/vypnutí funkcí, teplota, aktuální stav.<br>Plány – časové plány filtrace/ohřevu/solinátoru, záloha/obnova.<br>Nastavení – čas/časové pásmo, spolehlivost spojení s panelem, notifikace při výpadku.<br>Chyby – posledních 10 zaznamenaných chyb + Autodiagnostika a oprava (textový návod, okamžitý pokus o spojení, restart ESP32 na dálku, vymazání historie).",
+      guide_s5_1_head: "5.1 Použij hotovou stránku (nejjednodušší cesta)",
+      guide_s5_1_body: "Tenhle projekt už má hotovou, veřejně dostupnou stránku, kterou může použít kdokoliv – není potřeba zakládat vlastní GitHub účet ani nic hostovat. Stačí otevřít <a href=\"https://paegas123.github.io/intex-spa-web/\" target=\"_blank\" style=\"color:var(--accent);\">paegas123.github.io/intex-spa-web</a> a přes ozubené kolečko ⚙ zadat svoje vlastní MQTT údaje z Kroku 4 (adresa brokeru, port, uživatel, heslo). Stránka je univerzální a bezpečná ke sdílení – neobsahuje žádná citlivá data, každý uživatel má svoje přihlašovací údaje uložené jen ve vlastním prohlížeči, takže se navzájem nijak neovlivňujete. Krok 5.4 (vlastní hostování na GitHub Pages) je pak čistě volitelný, pro ty, kdo chtějí mít svou vlastní kopii.",
+      guide_s5_2_head: "5.2 Otevření stránky",
+      guide_s5_2_body: "Otevři soubor web/index.html v prohlížeči (dvojklikem, nebo přes GitHub Pages – viz 5.3).",
+      guide_s5_3_head: "5.3 Zadání MQTT údajů do dashboardu",
+      guide_s5_3_body: "Při prvním otevření (nebo kliknutím na ozubené kolečko ⚙ vpravo nahoře) zadej stejné MQTT údaje z Kroku 4.<br>Tyhle údaje se uloží přímo v prohlížeči (ne na ESP32) – na každém novém zařízení/prohlížeči je potřeba zadat znovu.<br>Ulož a dashboard by se měl připojit – v hlavičce uvidíš modré „Připojeno“.",
+      guide_s5_4_head: "5.4 Hostování na GitHub Pages (doporučeno pro stálý přístup)",
+      guide_s5_4_1_head: "5.4.1 Založení GitHub účtu (pokud ho ještě nemáš)",
+      guide_s5_4_1_body: "Jdi na github.com a klikni „Sign up“.<br>Zadej email, heslo, uživatelské jméno – je to zdarma.",
+      guide_s5_4_2_head: "5.4.2 Vytvoření nového repozitáře",
+      guide_s5_4_2_body: "Po přihlášení klikni vpravo nahoře na „+“ → „New repository“.<br>Zadej název (např. intex-spa-dashboard) – může být cokoliv.<br>Nastav ho jako Public (Pages ve free verzi funguje jen u veřejných repozitářů).<br>Nezaškrtávej žádné doplňkové soubory (README apod.) – nech prázdné.<br>Klikni „Create repository“.",
+      guide_s5_4_3_head: "5.4.3 Nahrání souboru index.html",
+      guide_s5_4_3_body: "V nově vytvořeném (prázdném) repozitáři klikni na odkaz „uploading an existing file“ (nebo „Add file“ → „Upload files“).<br>Přetáhni tam svůj web/index.html (jen ten jeden soubor index.html).<br>Dole klikni „Commit changes“ (zelené tlačítko) – tím se soubor uloží.",
+      guide_s5_4_4_head: "5.4.4 Zapnutí GitHub Pages",
+      guide_s5_4_4_body: "V repozitáři klikni nahoře na záložku „Settings“.<br>V levém menu najdi „Pages“.<br>U „Source“ vyber větev main a složku / (root).<br>Klikni „Save“.",
+      guide_s5_4_5_head: "5.4.5 Získání stálé adresy",
+      guide_s5_4_5_body: "Počkej cca 1-2 minuty (GitHub potřebuje chvíli na zveřejnění).<br>Znovu otevři Settings → Pages – nahoře už by mělo být zelené hlášení s odkazem typu https://tvoje-jmeno.github.io/intex-spa-dashboard/.<br>Pokud jsi nahrál soubor přímo jako index.html (ne do podsložky), tahle adresa rovnou otevře dashboard.",
+      guide_s5_4_6_head: "5.4.6 Uložení na plochu telefonu",
+      guide_s5_4_6_body: "Otevři tu adresu v mobilním prohlížeči (Safari na iPhonu, Chrome na Androidu).<br>iPhone (Safari): ikona sdílení (čtvereček se šipkou) → „Přidat na plochu“.<br>Android (Chrome): tři tečky vpravo nahoře → „Přidat na plochu“ / „Nainstalovat aplikaci“.<br>Na ploše se objeví ikonka, která po kliknutí otevře dashboard na celou obrazovku, bez adresního řádku – jako appka.",
+      guide_s5_4_7_head: "5.4.7 Aktualizace v budoucnu",
+      guide_s5_4_7_body: "Kdykoliv se web/index.html aktualizuje, stačí v GitHub repozitáři starý soubor nahradit novým (Add file → Upload files, přepsat) – adresa zůstává stejná, není potřeba nic znovu instalovat.",
+      guide_s5_5_head: "5.5 Notifikace při výpadku (volitelné)",
+      guide_s5_5_body: "Stáhni appku ntfy (App Store i Google Play) – oficiální appka pro tuhle zdarma službu.<br>V appce si zvol vlastní, těžko uhodnutelný název tématu (např. intexspa-tvoje-jmeno-8271) a přihlas se k němu (tlačítko „Subscribe to topic“).<br>Stejný název tématu zadej na konfigurační stránce ESP32 (192.168.4.1, pole „Téma ntfy.sh“) a ulož.<br>Zapnutí/vypnutí notifikací pak najdeš na hlavním webu v záložce Nastavení. Když je panel vířivky nedostupný déle než 15 minut, přijde notifikace, další po 60 minutách a pak každou hodinu, dokud se to nevyřeší.",
+      guide_s5_6_head: "5.6 Přehled záložek",
+      guide_s5_6_body: "Ovládání – zapnutí/vypnutí funkcí, teplota, aktuální stav.<br>Plány – časové plány filtrace/ohřevu/solinátoru, záloha/obnova.<br>Nastavení – čas/časové pásmo, spolehlivost spojení s panelem, notifikace při výpadku.<br>Chyby – posledních 10 zaznamenaných chyb + Autodiagnostika a oprava (textový návod, okamžitý pokus o spojení, restart ESP32 na dálku, vymazání historie).",
       guide_cloud_title: "O čem je ikonka Připojeno/Odpojeno",
       guide_cloud_p1: "Tahle appka mluví s vířivkou přes MQTT broker <b>HiveMQ Cloud</b> (zdarma služba, ne firma Intex). Je to jen „pošta uprostřed“ – ESP32 tam posílá stav, appka posílá příkazy, samotné rozhodování (plány, časování) běží pořád v ESP32 doma, ne v cloudu.",
       guide_cloud_p2: "Díky tomu appka funguje stejně doma i mimo domov, a nezávisí na Intexu ani na jejich appce.",
@@ -796,29 +800,31 @@
       guide_s4_5_head: "4.5 If you're not sure the cluster is still working",
       guide_s4_5_body: "Free HiveMQ clusters can be shut down after a long period of inactivity.<br>To check: if the ESP32's serial console shows \"[MQTT] Pripojuji se k brokeru... selhalo\", check on console.hivemq.cloud whether the cluster still exists.",
       guide_s5_title: "5. Opening the web dashboard",
-      guide_s5_1_head: "5.1 Opening the page",
-      guide_s5_1_body: "Open the web/index.html file in a browser (double-click, or via GitHub Pages – see 5.3).",
-      guide_s5_2_head: "5.2 Entering the MQTT details in the dashboard",
-      guide_s5_2_body: "The first time you open it (or by clicking the ⚙ gear icon top right), enter the same MQTT details from Step 4.<br>These are stored directly in the browser (not on the ESP32) – you'll need to enter them again on every new device/browser.<br>Save, and the dashboard should connect – you'll see a blue \"Connected\" in the header.",
-      guide_s5_3_head: "5.3 Hosting on GitHub Pages (recommended for permanent access)",
-      guide_s5_3_1_head: "5.3.1 Creating a GitHub account (if you don't have one yet)",
-      guide_s5_3_1_body: "Go to github.com and click \"Sign up\".<br>Enter your email, password, username – it's free.",
-      guide_s5_3_2_head: "5.3.2 Creating a new repository",
-      guide_s5_3_2_body: "After signing in, click \"+\" top right → \"New repository\".<br>Enter a name (e.g. intex-spa-dashboard) – anything works.<br>Set it to Public (Pages on the free tier only works for public repositories).<br>Don't check any extra files (README etc.) – leave it empty.<br>Click \"Create repository\".",
-      guide_s5_3_3_head: "5.3.3 Uploading the index.html file",
-      guide_s5_3_3_body: "In the newly created (empty) repository, click the \"uploading an existing file\" link (or \"Add file\" → \"Upload files\").<br>Drag your web/index.html there (just that one file, index.html).<br>Click \"Commit changes\" (green button) at the bottom – this saves the file.",
-      guide_s5_3_4_head: "5.3.4 Enabling GitHub Pages",
-      guide_s5_3_4_body: "In the repository, click the \"Settings\" tab at the top.<br>In the left menu, find \"Pages\".<br>Under \"Source\", pick the main branch and the / (root) folder.<br>Click \"Save\".",
-      guide_s5_3_5_head: "5.3.5 Getting the permanent address",
-      guide_s5_3_5_body: "Wait about 1-2 minutes (GitHub needs a moment to publish).<br>Open Settings → Pages again – there should now be a green message at the top with a link like https://your-name.github.io/intex-spa-dashboard/.<br>If you uploaded the file directly as index.html (not into a subfolder), this address opens the dashboard directly.",
-      guide_s5_3_6_head: "5.3.6 Saving it to your phone's home screen",
-      guide_s5_3_6_body: "Open that address in your mobile browser (Safari on iPhone, Chrome on Android).<br>iPhone (Safari): Share icon (square with arrow) → \"Add to Home Screen\".<br>Android (Chrome): three dots top right → \"Add to Home screen\" / \"Install app\".<br>An icon appears on your home screen that opens the dashboard full-screen, without an address bar – just like an app.",
-      guide_s5_3_7_head: "5.3.7 Future updates",
-      guide_s5_3_7_body: "Whenever web/index.html gets updated, just replace the old file in the GitHub repository with the new one (Add file → Upload files, overwrite) – the address stays the same, nothing needs reinstalling.",
-      guide_s5_4_head: "5.4 Outage notifications (optional)",
-      guide_s5_4_body: "Download the ntfy app (App Store and Google Play) – the official app for this free service.<br>In the app, pick your own hard-to-guess topic name (e.g. intexspa-your-name-8271) and subscribe to it (\"Subscribe to topic\" button).<br>Enter the same topic name on the ESP32's configuration page (192.168.4.1, \"ntfy.sh topic\" field) and save.<br>You'll find the on/off toggle for notifications on the main dashboard's Settings tab. If the spa panel is unreachable for more than 15 minutes, you'll get a notification, another after 60 minutes, then every hour until it's resolved.",
-      guide_s5_5_head: "5.5 Tab overview",
-      guide_s5_5_body: "Control – turn functions on/off, temperature, current status.<br>Schedules – time schedules for filtration/heating/sanitizer, backup/restore.<br>Settings – time/timezone, panel connection reliability, outage notifications.<br>Errors – the last 10 recorded errors + Auto-diagnosis and fix (step-by-step guidance, instant retry, remote ESP32 restart, clear history).",
+      guide_s5_1_head: "5.1 Use the ready-made page (easiest way)",
+      guide_s5_1_body: "This project already has a ready-made, publicly available page that anyone can use – no need to create your own GitHub account or host anything. Just open <a href=\"https://paegas123.github.io/intex-spa-web/\" target=\"_blank\" style=\"color:var(--accent);\">paegas123.github.io/intex-spa-web</a> and enter your own MQTT details from Step 4 (broker address, port, username, password) via the ⚙ gear icon. The page is universal and safe to share – it contains no sensitive data, each user's login details are stored only in their own browser, so you don't affect each other in any way. Step 5.4 (self-hosting on GitHub Pages) is then purely optional, for those who want their own copy.",
+      guide_s5_2_head: "5.2 Opening the page",
+      guide_s5_2_body: "Open the web/index.html file in a browser (double-click, or via GitHub Pages – see 5.3).",
+      guide_s5_3_head: "5.3 Entering the MQTT details in the dashboard",
+      guide_s5_3_body: "The first time you open it (or by clicking the ⚙ gear icon top right), enter the same MQTT details from Step 4.<br>These are stored directly in the browser (not on the ESP32) – you'll need to enter them again on every new device/browser.<br>Save, and the dashboard should connect – you'll see a blue \"Connected\" in the header.",
+      guide_s5_4_head: "5.4 Hosting on GitHub Pages (recommended for permanent access)",
+      guide_s5_4_1_head: "5.4.1 Creating a GitHub account (if you don't have one yet)",
+      guide_s5_4_1_body: "Go to github.com and click \"Sign up\".<br>Enter your email, password, username – it's free.",
+      guide_s5_4_2_head: "5.4.2 Creating a new repository",
+      guide_s5_4_2_body: "After signing in, click \"+\" top right → \"New repository\".<br>Enter a name (e.g. intex-spa-dashboard) – anything works.<br>Set it to Public (Pages on the free tier only works for public repositories).<br>Don't check any extra files (README etc.) – leave it empty.<br>Click \"Create repository\".",
+      guide_s5_4_3_head: "5.4.3 Uploading the index.html file",
+      guide_s5_4_3_body: "In the newly created (empty) repository, click the \"uploading an existing file\" link (or \"Add file\" → \"Upload files\").<br>Drag your web/index.html there (just that one file, index.html).<br>Click \"Commit changes\" (green button) at the bottom – this saves the file.",
+      guide_s5_4_4_head: "5.4.4 Enabling GitHub Pages",
+      guide_s5_4_4_body: "In the repository, click the \"Settings\" tab at the top.<br>In the left menu, find \"Pages\".<br>Under \"Source\", pick the main branch and the / (root) folder.<br>Click \"Save\".",
+      guide_s5_4_5_head: "5.4.5 Getting the permanent address",
+      guide_s5_4_5_body: "Wait about 1-2 minutes (GitHub needs a moment to publish).<br>Open Settings → Pages again – there should now be a green message at the top with a link like https://your-name.github.io/intex-spa-dashboard/.<br>If you uploaded the file directly as index.html (not into a subfolder), this address opens the dashboard directly.",
+      guide_s5_4_6_head: "5.4.6 Saving it to your phone's home screen",
+      guide_s5_4_6_body: "Open that address in your mobile browser (Safari on iPhone, Chrome on Android).<br>iPhone (Safari): Share icon (square with arrow) → \"Add to Home Screen\".<br>Android (Chrome): three dots top right → \"Add to Home screen\" / \"Install app\".<br>An icon appears on your home screen that opens the dashboard full-screen, without an address bar – just like an app.",
+      guide_s5_4_7_head: "5.4.7 Future updates",
+      guide_s5_4_7_body: "Whenever web/index.html gets updated, just replace the old file in the GitHub repository with the new one (Add file → Upload files, overwrite) – the address stays the same, nothing needs reinstalling.",
+      guide_s5_5_head: "5.5 Outage notifications (optional)",
+      guide_s5_5_body: "Download the ntfy app (App Store and Google Play) – the official app for this free service.<br>In the app, pick your own hard-to-guess topic name (e.g. intexspa-your-name-8271) and subscribe to it (\"Subscribe to topic\" button).<br>Enter the same topic name on the ESP32's configuration page (192.168.4.1, \"ntfy.sh topic\" field) and save.<br>You'll find the on/off toggle for notifications on the main dashboard's Settings tab. If the spa panel is unreachable for more than 15 minutes, you'll get a notification, another after 60 minutes, then every hour until it's resolved.",
+      guide_s5_6_head: "5.6 Tab overview",
+      guide_s5_6_body: "Control – turn functions on/off, temperature, current status.<br>Schedules – time schedules for filtration/heating/sanitizer, backup/restore.<br>Settings – time/timezone, panel connection reliability, outage notifications.<br>Errors – the last 10 recorded errors + Auto-diagnosis and fix (step-by-step guidance, instant retry, remote ESP32 restart, clear history).",
       guide_cloud_title: "What the Connected/Disconnected icon is about",
       guide_cloud_p1: "This app talks to the spa through the <b>HiveMQ Cloud</b> MQTT broker (a free service, not Intex). It's just a \"mailbox in the middle\" – the ESP32 sends status there, the app sends commands there; the actual decision-making (schedules, timing) still runs on the ESP32 at home, not in the cloud.",
       guide_cloud_p2: "That's why the app works the same at home and away, and doesn't depend on Intex or their app.",
@@ -926,29 +932,31 @@
       guide_s4_5_head: "4.5 Falls du dir nicht sicher bist, ob der Cluster noch läuft",
       guide_s4_5_body: "Kostenlose HiveMQ-Cluster können nach längerer Inaktivität abgeschaltet werden.<br>Prüfung: Wenn der ESP32 in der seriellen Konsole „[MQTT] Pripojuji se k brokeru... selhalo“ anzeigt, prüfe auf console.hivemq.cloud, ob der Cluster noch existiert.",
       guide_s5_title: "5. Web-Dashboard öffnen",
-      guide_s5_1_head: "5.1 Seite öffnen",
-      guide_s5_1_body: "Öffne die Datei web/index.html im Browser (Doppelklick, oder über GitHub Pages – siehe 5.3).",
-      guide_s5_2_head: "5.2 MQTT-Daten im Dashboard eintragen",
-      guide_s5_2_body: "Beim ersten Öffnen (oder über das Zahnrad ⚙ oben rechts) dieselben MQTT-Daten aus Schritt 4 eingeben.<br>Diese werden direkt im Browser gespeichert (nicht auf dem ESP32) – auf jedem neuen Gerät/Browser müssen sie erneut eingegeben werden.<br>Speichern, das Dashboard sollte sich verbinden – oben erscheint ein blaues „Verbunden“.",
-      guide_s5_3_head: "5.3 Hosting auf GitHub Pages (empfohlen für dauerhaften Zugriff)",
-      guide_s5_3_1_head: "5.3.1 GitHub-Konto erstellen (falls noch keins vorhanden)",
-      guide_s5_3_1_body: "Gehe zu github.com und klicke „Sign up“.<br>Gib E-Mail, Passwort, Benutzername ein – kostenlos.",
-      guide_s5_3_2_head: "5.3.2 Neues Repository erstellen",
-      guide_s5_3_2_body: "Klicke nach der Anmeldung oben rechts auf „+“ → „New repository“.<br>Gib einen Namen ein (z.B. intex-spa-dashboard) – beliebig wählbar.<br>Stelle es auf Public (Pages funktioniert in der kostenlosen Version nur bei öffentlichen Repositories).<br>Keine zusätzlichen Dateien (README o.ä.) ankreuzen – leer lassen.<br>Klicke „Create repository“.",
-      guide_s5_3_3_head: "5.3.3 Datei index.html hochladen",
-      guide_s5_3_3_body: "Klicke im neu erstellten (leeren) Repository auf den Link „uploading an existing file“ (oder „Add file“ → „Upload files“).<br>Ziehe deine web/index.html dorthin (nur diese eine Datei, index.html).<br>Klicke unten auf „Commit changes“ (grüner Button) – damit wird die Datei gespeichert.",
-      guide_s5_3_4_head: "5.3.4 GitHub Pages aktivieren",
-      guide_s5_3_4_body: "Klicke im Repository oben auf den Tab „Settings“.<br>Finde im linken Menü „Pages“.<br>Wähle unter „Source“ den Branch main und den Ordner / (root).<br>Klicke „Save“.",
-      guide_s5_3_5_head: "5.3.5 Dauerhafte Adresse erhalten",
-      guide_s5_3_5_body: "Warte etwa 1-2 Minuten (GitHub braucht einen Moment zur Veröffentlichung).<br>Öffne erneut Settings → Pages – oben sollte jetzt eine grüne Meldung mit einem Link wie https://dein-name.github.io/intex-spa-dashboard/ stehen.<br>Falls du die Datei direkt als index.html hochgeladen hast (nicht in einen Unterordner), öffnet diese Adresse direkt das Dashboard.",
-      guide_s5_3_6_head: "5.3.6 Auf dem Homescreen des Handys speichern",
-      guide_s5_3_6_body: "Öffne diese Adresse im mobilen Browser (Safari auf iPhone, Chrome auf Android).<br>iPhone (Safari): Teilen-Symbol (Quadrat mit Pfeil) → „Zum Home-Bildschirm“.<br>Android (Chrome): drei Punkte oben rechts → „Zum Startbildschirm hinzufügen“ / „App installieren“.<br>Auf dem Homescreen erscheint ein Symbol, das beim Antippen das Dashboard im Vollbild öffnet, ohne Adressleiste – wie eine App.",
-      guide_s5_3_7_head: "5.3.7 Zukünftige Aktualisierungen",
-      guide_s5_3_7_body: "Sobald sich web/index.html aktualisiert, reicht es, im GitHub-Repository die alte Datei durch die neue zu ersetzen (Add file → Upload files, überschreiben) – die Adresse bleibt gleich, nichts muss neu installiert werden.",
-      guide_s5_4_head: "5.4 Benachrichtigungen bei Ausfall (optional)",
-      guide_s5_4_body: "Lade die App ntfy herunter (App Store und Google Play) – die offizielle App für diesen kostenlosen Dienst.<br>Wähle in der App ein eigenes, schwer zu erratendes Thema (z.B. intexspa-dein-name-8271) und abonniere es (Button „Subscribe to topic“).<br>Trage denselben Themennamen auf der Konfigurationsseite des ESP32 ein (192.168.4.1, Feld „ntfy.sh-Thema“) und speichere.<br>Den Ein/Aus-Schalter für Benachrichtigungen findest du dann im Haupt-Dashboard im Tab Einstellungen. Ist das Whirlpool-Panel länger als 15 Minuten nicht erreichbar, kommt eine Benachrichtigung, eine weitere nach 60 Minuten, danach jede Stunde, bis das Problem behoben ist.",
-      guide_s5_5_head: "5.5 Übersicht der Tabs",
-      guide_s5_5_body: "Steuerung – Funktionen ein-/ausschalten, Temperatur, aktueller Status.<br>Zeitpläne – Zeitpläne für Filtration/Heizung/Desinfektion, Sicherung/Wiederherstellung.<br>Einstellungen – Zeit/Zeitzone, Verbindungszuverlässigkeit zum Panel, Benachrichtigungen bei Ausfall.<br>Fehler – die letzten 10 protokollierten Fehler + Autodiagnose und Reparatur (Schritt-für-Schritt-Anleitung, sofortiger erneuter Versuch, ESP32-Neustart aus der Ferne, Verlauf löschen).",
+      guide_s5_1_head: "5.1 Die fertige Seite nutzen (einfachster Weg)",
+      guide_s5_1_body: "Dieses Projekt hat bereits eine fertige, öffentlich zugängliche Seite, die jeder nutzen kann – kein eigenes GitHub-Konto oder Hosting nötig. Öffne einfach <a href=\"https://paegas123.github.io/intex-spa-web/\" target=\"_blank\" style=\"color:var(--accent);\">paegas123.github.io/intex-spa-web</a> und trage über das Zahnrad ⚙ deine eigenen MQTT-Daten aus Schritt 4 ein (Broker-Adresse, Port, Benutzername, Passwort). Die Seite ist universell und sicher zu teilen – sie enthält keine sensiblen Daten, die Zugangsdaten jedes Nutzers werden nur im eigenen Browser gespeichert, sodass ihr euch gegenseitig nicht beeinflusst. Schritt 5.4 (eigenes Hosting auf GitHub Pages) ist dann rein optional, für alle, die eine eigene Kopie wollen.",
+      guide_s5_2_head: "5.2 Seite öffnen",
+      guide_s5_2_body: "Öffne die Datei web/index.html im Browser (Doppelklick, oder über GitHub Pages – siehe 5.3).",
+      guide_s5_3_head: "5.3 MQTT-Daten im Dashboard eintragen",
+      guide_s5_3_body: "Beim ersten Öffnen (oder über das Zahnrad ⚙ oben rechts) dieselben MQTT-Daten aus Schritt 4 eingeben.<br>Diese werden direkt im Browser gespeichert (nicht auf dem ESP32) – auf jedem neuen Gerät/Browser müssen sie erneut eingegeben werden.<br>Speichern, das Dashboard sollte sich verbinden – oben erscheint ein blaues „Verbunden“.",
+      guide_s5_4_head: "5.4 Hosting auf GitHub Pages (empfohlen für dauerhaften Zugriff)",
+      guide_s5_4_1_head: "5.4.1 GitHub-Konto erstellen (falls noch keins vorhanden)",
+      guide_s5_4_1_body: "Gehe zu github.com und klicke „Sign up“.<br>Gib E-Mail, Passwort, Benutzername ein – kostenlos.",
+      guide_s5_4_2_head: "5.4.2 Neues Repository erstellen",
+      guide_s5_4_2_body: "Klicke nach der Anmeldung oben rechts auf „+“ → „New repository“.<br>Gib einen Namen ein (z.B. intex-spa-dashboard) – beliebig wählbar.<br>Stelle es auf Public (Pages funktioniert in der kostenlosen Version nur bei öffentlichen Repositories).<br>Keine zusätzlichen Dateien (README o.ä.) ankreuzen – leer lassen.<br>Klicke „Create repository“.",
+      guide_s5_4_3_head: "5.4.3 Datei index.html hochladen",
+      guide_s5_4_3_body: "Klicke im neu erstellten (leeren) Repository auf den Link „uploading an existing file“ (oder „Add file“ → „Upload files“).<br>Ziehe deine web/index.html dorthin (nur diese eine Datei, index.html).<br>Klicke unten auf „Commit changes“ (grüner Button) – damit wird die Datei gespeichert.",
+      guide_s5_4_4_head: "5.4.4 GitHub Pages aktivieren",
+      guide_s5_4_4_body: "Klicke im Repository oben auf den Tab „Settings“.<br>Finde im linken Menü „Pages“.<br>Wähle unter „Source“ den Branch main und den Ordner / (root).<br>Klicke „Save“.",
+      guide_s5_4_5_head: "5.4.5 Dauerhafte Adresse erhalten",
+      guide_s5_4_5_body: "Warte etwa 1-2 Minuten (GitHub braucht einen Moment zur Veröffentlichung).<br>Öffne erneut Settings → Pages – oben sollte jetzt eine grüne Meldung mit einem Link wie https://dein-name.github.io/intex-spa-dashboard/ stehen.<br>Falls du die Datei direkt als index.html hochgeladen hast (nicht in einen Unterordner), öffnet diese Adresse direkt das Dashboard.",
+      guide_s5_4_6_head: "5.4.6 Auf dem Homescreen des Handys speichern",
+      guide_s5_4_6_body: "Öffne diese Adresse im mobilen Browser (Safari auf iPhone, Chrome auf Android).<br>iPhone (Safari): Teilen-Symbol (Quadrat mit Pfeil) → „Zum Home-Bildschirm“.<br>Android (Chrome): drei Punkte oben rechts → „Zum Startbildschirm hinzufügen“ / „App installieren“.<br>Auf dem Homescreen erscheint ein Symbol, das beim Antippen das Dashboard im Vollbild öffnet, ohne Adressleiste – wie eine App.",
+      guide_s5_4_7_head: "5.4.7 Zukünftige Aktualisierungen",
+      guide_s5_4_7_body: "Sobald sich web/index.html aktualisiert, reicht es, im GitHub-Repository die alte Datei durch die neue zu ersetzen (Add file → Upload files, überschreiben) – die Adresse bleibt gleich, nichts muss neu installiert werden.",
+      guide_s5_5_head: "5.5 Benachrichtigungen bei Ausfall (optional)",
+      guide_s5_5_body: "Lade die App ntfy herunter (App Store und Google Play) – die offizielle App für diesen kostenlosen Dienst.<br>Wähle in der App ein eigenes, schwer zu erratendes Thema (z.B. intexspa-dein-name-8271) und abonniere es (Button „Subscribe to topic“).<br>Trage denselben Themennamen auf der Konfigurationsseite des ESP32 ein (192.168.4.1, Feld „ntfy.sh-Thema“) und speichere.<br>Den Ein/Aus-Schalter für Benachrichtigungen findest du dann im Haupt-Dashboard im Tab Einstellungen. Ist das Whirlpool-Panel länger als 15 Minuten nicht erreichbar, kommt eine Benachrichtigung, eine weitere nach 60 Minuten, danach jede Stunde, bis das Problem behoben ist.",
+      guide_s5_6_head: "5.6 Übersicht der Tabs",
+      guide_s5_6_body: "Steuerung – Funktionen ein-/ausschalten, Temperatur, aktueller Status.<br>Zeitpläne – Zeitpläne für Filtration/Heizung/Desinfektion, Sicherung/Wiederherstellung.<br>Einstellungen – Zeit/Zeitzone, Verbindungszuverlässigkeit zum Panel, Benachrichtigungen bei Ausfall.<br>Fehler – die letzten 10 protokollierten Fehler + Autodiagnose und Reparatur (Schritt-für-Schritt-Anleitung, sofortiger erneuter Versuch, ESP32-Neustart aus der Ferne, Verlauf löschen).",
       guide_cloud_title: "Was das Symbol Verbunden/Getrennt bedeutet",
       guide_cloud_p1: "Diese App spricht über den MQTT-Broker <b>HiveMQ Cloud</b> mit dem Whirlpool (ein kostenloser Dienst, nicht von Intex). Er ist nur ein „Briefkasten in der Mitte“ – der ESP32 sendet dort den Status hin, die App sendet dort Befehle hin; die eigentliche Logik (Zeitpläne, Timing) läuft weiterhin auf dem ESP32 zu Hause, nicht in der Cloud.",
       guide_cloud_p2: "Deshalb funktioniert die App zu Hause und unterwegs gleich und ist unabhängig von Intex und deren App.",
@@ -972,7 +980,7 @@
   function applyI18n() {
     document.documentElement.lang = lang;
     document.querySelectorAll("[data-i18n]").forEach((el) => {
-      el.textContent = t(el.dataset.i18n);
+      el.innerHTML = t(el.dataset.i18n);
     });
     document.querySelectorAll(".lang-switch button").forEach((b) => {
       b.classList.toggle("active", b.dataset.lang === lang);
