@@ -404,6 +404,16 @@
       <button class="btn btn-secondary" id="diagRestartBtn" style="width:100%;margin-top:10px;color:var(--danger);" data-i18n="diag_restart">Restartovat ESP32</button>
       <button class="btn btn-secondary" id="diagClearBtn" style="width:100%;margin-top:10px;color:var(--danger);" data-i18n="diag_clear">Vymazat historii chyb</button>
     </div>
+
+    <div class="settings-card">
+      <h3 data-i18n="bootlog_title">Historie restartů</h3>
+      <p class="hint" data-i18n="bootlog_hint">Trvale uložené (přežije i výpadek proudu) - proč se ESP32 naposledy spustilo, posledních 10 záznamů.</p>
+      <div class="reliability-item" style="margin-bottom:10px;">
+        <span class="reliability-label" data-i18n="bootlog_total">Celkem restartů za dobu provozu</span>
+        <span class="reliability-value" id="bootlogCount">–</span>
+      </div>
+      <div class="error-list" id="bootlogList"></div>
+    </div>
   </div>
 
   <!-- ============== TAB: Návod ============== -->
@@ -609,6 +619,10 @@
       diag_clear: "Vymazat historii chyb",
       diag_clear_confirm: "Opravdu vymazat celou historii chyb? Nejde vrátit zpět.",
       diag_clear_sent: "Odesláno - historie chyb byla vymazána.",
+      bootlog_title: "Historie restartů",
+      bootlog_hint: "Trvale uložené (přežije i výpadek proudu) - proč se ESP32 naposledy spustilo, posledních 10 záznamů.",
+      bootlog_total: "Celkem restartů za dobu provozu",
+      bootlog_unknown_time: "čas neznámý",
       diag_restart_confirm: "Opravdu restartovat ESP32? Na chvíli (cca 10-20s) vypadne veškeré spojení.",
       diag_retry_sent: "Odesláno - ESP32 se hned pokusí spojit s panelem.",
       diag_restart_sent: "Odesláno - ESP32 se za chvíli restartuje.",
@@ -741,6 +755,10 @@
       diag_clear: "Clear error history",
       diag_clear_confirm: "Really clear the entire error history? This can't be undone.",
       diag_clear_sent: "Sent - the error history has been cleared.",
+      bootlog_title: "Restart history",
+      bootlog_hint: "Stored permanently (survives power loss) - why the ESP32 last started up, last 10 entries.",
+      bootlog_total: "Total restarts over the device's lifetime",
+      bootlog_unknown_time: "time unknown",
       diag_restart_confirm: "Really restart the ESP32? Everything will briefly (~10-20s) go offline.",
       diag_retry_sent: "Sent - the ESP32 will try reaching the panel right away.",
       diag_restart_sent: "Sent - the ESP32 will restart shortly.",
@@ -873,6 +891,10 @@
       diag_clear: "Fehlerverlauf löschen",
       diag_clear_confirm: "Wirklich den gesamten Fehlerverlauf löschen? Das kann nicht rückgängig gemacht werden.",
       diag_clear_sent: "Gesendet - der Fehlerverlauf wurde gelöscht.",
+      bootlog_title: "Neustartverlauf",
+      bootlog_hint: "Dauerhaft gespeichert (übersteht auch einen Stromausfall) - warum der ESP32 zuletzt gestartet ist, letzte 10 Einträge.",
+      bootlog_total: "Neustarts insgesamt seit Inbetriebnahme",
+      bootlog_unknown_time: "Zeit unbekannt",
       diag_restart_confirm: "ESP32 wirklich neu starten? Alles ist kurz (~10-20s) offline.",
       diag_retry_sent: "Gesendet - der ESP32 versucht sofort, das Panel zu erreichen.",
       diag_restart_sent: "Gesendet - der ESP32 startet in Kürze neu.",
@@ -1026,6 +1048,7 @@
   const TOPIC_SIGNAL = "intexspa/signal";
   const TOPIC_RELIABILITY = "intexspa/reliability";
   const TOPIC_ERRORS = "intexspa/errors";
+  const TOPIC_BOOTLOG = "intexspa/bootlog";
   const TOPIC_NOTIFY = "intexspa/settings/notify";
   const TOPIC_NOTIFY_SET = "intexspa/settings/notify/set";
 
@@ -1157,6 +1180,7 @@
       client.subscribe(TOPIC_SIGNAL);
       client.subscribe(TOPIC_RELIABILITY);
       client.subscribe(TOPIC_ERRORS);
+      client.subscribe(TOPIC_BOOTLOG);
       client.subscribe(TOPIC_NOTIFY);
       client.publish(TOPIC_SCHED_REQUEST, "1");
     });
@@ -1180,6 +1204,7 @@
           recomputeConnDisplay();
         }
         else if (topic === TOPIC_ERRORS) { renderErrors(JSON.parse(str)); }
+        else if (topic === TOPIC_BOOTLOG) { renderBootlog(JSON.parse(str)); }
         else if (topic === TOPIC_NOTIFY) { renderNotifySettings(JSON.parse(str)); }
       } catch (e) { console.error("Chyba zpracovani zpravy", topic, e); }
     });
@@ -1504,6 +1529,27 @@
     // Hlavni indikator pripojeno/odpojeno zavisi mimo jine i na tom,
     // jestli aktualne bezi chyba "panel_unreachable" - prepocitat hned.
     recomputeConnDisplay();
+  }
+
+  // ===================== Historie restartu (trvala, z NVS) =====================
+  function renderBootlog(data) {
+    document.getElementById("bootlogCount").textContent = (data.boot_count != null) ? data.boot_count : "–";
+
+    const wrap = document.getElementById("bootlogList");
+    wrap.innerHTML = "";
+    const entries = data.entries || [];
+    entries.forEach((e) => {
+      const card = document.createElement("div");
+      card.className = "error-card";
+      const timeStr = fmtErrorTime(e.time) === "?" ? t("bootlog_unknown_time") : fmtErrorTime(e.time);
+      card.innerHTML =
+        "<span class='conn-dot blue'></span>" +
+        "<div class='error-main'>" +
+        "<span class='error-type'>" + e.reason + "</span>" +
+        "<span class='error-time'>" + timeStr + "</span>" +
+        "</div>";
+      wrap.appendChild(card);
+    });
   }
 
   // ===================== Autodiagnostika a oprava =====================
