@@ -381,6 +381,23 @@
     </div>
 
     <div class="settings-card">
+      <h3 data-i18n="heap_title">Volná paměť (RAM)</h3>
+      <div class="reliability-item">
+        <span class="reliability-label" data-i18n="heap_free">Aktuálně volno</span>
+        <span class="reliability-value" id="heapFreeValue">–</span>
+      </div>
+      <div class="reliability-item">
+        <span class="reliability-label" data-i18n="heap_min_free">Nejméně od startu</span>
+        <span class="reliability-value" id="heapMinFreeValue">–</span>
+      </div>
+      <div class="reliability-item">
+        <span class="reliability-label" data-i18n="heap_uptime">Běží od posledního startu</span>
+        <span class="reliability-value" id="heapUptimeValue">–</span>
+      </div>
+      <p class="hint" data-i18n="heap_hint">Pokud "Aktuálně volno" postupně klesá dny/týdny dopředu, naznačuje to únik paměti v programu.</p>
+    </div>
+
+    <div class="settings-card">
       <h3 data-i18n="notify_title">Notifikace při výpadku</h3>
       <p class="hint" data-i18n="notify_hint">Pošle push notifikaci na telefon (přes ntfy.sh), pokud je panel vířivky nedostupný déle než 15 minut, pak znovu po 60 minutách a dál každou hodinu, dokud se to nevyřeší. Téma ntfy.sh se nastavuje jednorázově na stránce 192.168.4.1.</p>
       <div class="radio-row">
@@ -713,6 +730,9 @@
       signal_router: "Router",
       reliability_label: "Spolehlivost spojení", last_contact_label: "Poslední spojení s panelem",
       reliability_hint: "Kolik z posledních dotazů na panel prošlo v pořádku, a jak dávno naposledy prošla komunikace. Síťové nastavení (WiFi, IP panelu, MQTT) se dělá na stránce 192.168.4.1, ne odsud.",
+      heap_title: "Volná paměť (RAM)",
+      heap_free: "Aktuálně volno", heap_min_free: "Nejméně od startu", heap_uptime: "Běží od posledního startu",
+      heap_hint: "Pokud \"Aktuálně volno\" postupně klesá dny/týdny dopředu, naznačuje to únik paměti v programu.",
       notify_title: "Notifikace při výpadku",
       notify_hint: "Pošle push notifikaci na telefon (přes ntfy.sh), pokud je panel vířivky nedostupný déle než 15 minut, pak znovu po 60 minutách a dál každou hodinu, dokud se to nevyřeší. Téma ntfy.sh se nastavuje jednorázově na stránce 192.168.4.1.",
       notify_on: "Zapnuto", notify_off: "Vypnuto",
@@ -849,6 +869,9 @@
       signal_router: "Router",
       reliability_label: "Connection reliability", last_contact_label: "Last contact with panel",
       reliability_hint: "How many of the last checks on the panel succeeded, and how long ago the last one came through. Network settings (WiFi, panel IP, MQTT) are done on the 192.168.4.1 page, not here.",
+      heap_title: "Free memory (RAM)",
+      heap_free: "Currently free", heap_min_free: "Lowest since boot", heap_uptime: "Running since last boot",
+      heap_hint: "If \"Currently free\" keeps dropping over days/weeks, it suggests a memory leak in the program.",
       notify_title: "Outage notifications",
       notify_hint: "Sends a push notification to your phone (via ntfy.sh) if the spa panel is unreachable for more than 15 minutes, then again after 60 minutes, and every hour after that until it's resolved. The ntfy.sh topic is set once on the 192.168.4.1 page.",
       notify_on: "On", notify_off: "Off",
@@ -985,6 +1008,9 @@
       signal_router: "Router",
       reliability_label: "Verbindungszuverlässigkeit", last_contact_label: "Letzter Kontakt mit dem Panel",
       reliability_hint: "Wie viele der letzten Anfragen an das Panel erfolgreich waren und wie lange der letzte Kontakt her ist. Netzwerkeinstellungen (WiFi, Panel-IP, MQTT) werden auf der Seite 192.168.4.1 vorgenommen, nicht hier.",
+      heap_title: "Freier Speicher (RAM)",
+      heap_free: "Aktuell frei", heap_min_free: "Niedrigster seit Start", heap_uptime: "Laufzeit seit letztem Start",
+      heap_hint: "Wenn \"Aktuell frei\" über Tage/Wochen stetig sinkt, deutet das auf ein Speicherleck im Programm hin.",
       notify_title: "Benachrichtigungen bei Ausfall",
       notify_hint: "Sendet eine Push-Benachrichtigung an dein Handy (über ntfy.sh), wenn das Whirlpool-Panel länger als 15 Minuten nicht erreichbar ist, dann erneut nach 60 Minuten und danach jede weitere Stunde, bis das Problem behoben ist. Das ntfy.sh-Thema wird einmalig auf der Seite 192.168.4.1 eingestellt.",
       notify_on: "Ein", notify_off: "Aus",
@@ -1049,6 +1075,7 @@
   const TOPIC_RELIABILITY = "intexspa/reliability";
   const TOPIC_ERRORS = "intexspa/errors";
   const TOPIC_BOOTLOG = "intexspa/bootlog";
+  const TOPIC_HEAP = "intexspa/heap";
   const TOPIC_NOTIFY = "intexspa/settings/notify";
   const TOPIC_NOTIFY_SET = "intexspa/settings/notify/set";
 
@@ -1181,6 +1208,7 @@
       client.subscribe(TOPIC_RELIABILITY);
       client.subscribe(TOPIC_ERRORS);
       client.subscribe(TOPIC_BOOTLOG);
+      client.subscribe(TOPIC_HEAP);
       client.subscribe(TOPIC_NOTIFY);
       client.publish(TOPIC_SCHED_REQUEST, "1");
     });
@@ -1205,6 +1233,7 @@
         }
         else if (topic === TOPIC_ERRORS) { renderErrors(JSON.parse(str)); }
         else if (topic === TOPIC_BOOTLOG) { renderBootlog(JSON.parse(str)); }
+        else if (topic === TOPIC_HEAP) { renderHeap(JSON.parse(str)); }
         else if (topic === TOPIC_NOTIFY) { renderNotifySettings(JSON.parse(str)); }
       } catch (e) { console.error("Chyba zpracovani zpravy", topic, e); }
     });
@@ -1550,6 +1579,22 @@
         "</div>";
       wrap.appendChild(card);
     });
+  }
+
+  function fmtUptime(sec) {
+    if (sec == null) return "–";
+    const days = Math.floor(sec / 86400);
+    const hours = Math.floor((sec % 86400) / 3600);
+    if (days > 0) return days + "d " + hours + "h";
+    const mins = Math.floor((sec % 3600) / 60);
+    return hours + "h " + mins + "m";
+  }
+
+  function renderHeap(data) {
+    const fmtBytes = (n) => (n != null) ? (n / 1024).toFixed(1) + " KB" : "–";
+    document.getElementById("heapFreeValue").textContent = fmtBytes(data.free);
+    document.getElementById("heapMinFreeValue").textContent = fmtBytes(data.min_free);
+    document.getElementById("heapUptimeValue").textContent = fmtUptime(data.uptime_sec);
   }
 
   // ===================== Autodiagnostika a oprava =====================
